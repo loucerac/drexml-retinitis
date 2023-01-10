@@ -182,4 +182,4 @@ rsconnect/
 
 ## USER
 .venvs/
-.data/
+data/
