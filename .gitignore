@@ -183,3 +183,4 @@ rsconnect/
 ## USER
 .venvs/
 data/
+nohup*
