@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 
 import click
-import pandas
+import pandas as pd
 import requests
 from biothings_client import get_client
 
@@ -24,22 +24,25 @@ def collapse_list_values(row):
     return row
 
 
-def convert_uniprot_ids(uniprot_lst):
-    mg = get_client("gene")
-    # mg.getgenes(["uniprot:P00734"], fields='name,symbol,entrezgene,taxid', as_dataframe=True)
-    genes_converted = mg.querymany(
-        uniprot_lst,
-        scopes="uniprot",
-        fields="entrezgene,symbol",
+def convert_gene_ids(gene_ids, source="entrezgene", target="uniprot,symbol"):
+    renamer = {
+        "uniprot": "uniprot_id",
+        "entrezgene": "entrez_id",
+        "symbol": "symbol_id",
+    }
+    client = get_client("gene")
+    genes_converted = client.querymany(
+        gene_ids,
+        scopes=source,
+        fields=target,
         species="human",
         as_dataframe=True,
     )
 
-    genes_converted = genes_converted.reset_index(names=["uniprot_id"])
-    genes_converted = genes_converted.query("notfound!=True")[
-        ["uniprot_id", "entrezgene", "symbol"]
-    ]
-    genes_converted = genes_converted.rename(columns={"entrezgene": "entrez_id"})
+    genes_converted = genes_converted.reset_index(names=[source])
+    cols_query = genes_converted.columns.isin(["uniprot", "entrezgene", "symbol"])
+    genes_converted = genes_converted.loc[:, cols_query]
+    genes_converted = genes_converted.rename(columns=renamer)
 
     return genes_converted
 
@@ -55,7 +58,7 @@ def build_drug_dataset(root):
     )
 
     rows = list()
-    for i, drug in enumerate(root):
+    for _, drug in enumerate(root):
         row = collections.OrderedDict()
         assert drug.tag == ns + "drug"
         row["type"] = drug.get("type")
@@ -80,15 +83,11 @@ def build_drug_dataset(root):
         aliases = {
             elem.text
             for elem in drug.findall(
-                "{ns}international-brands/{ns}international-brand".format(ns=ns)
+                f"{ns}international-brands/{ns}international-brand"
             )
-            + drug.findall(
-                "{ns}synonyms/{ns}synonym[@language='English']".format(ns=ns)
-            )
-            + drug.findall(
-                "{ns}international-brands/{ns}international-brand".format(ns=ns)
-            )
-            + drug.findall("{ns}products/{ns}product/{ns}name".format(ns=ns))
+            + drug.findall(f"{ns}synonyms/{ns}synonym[@language='English']")
+            + drug.findall(f"{ns}international-brands/{ns}international-brand")
+            + drug.findall(f"{ns}products/{ns}product/{ns}name")
         }
         aliases.add(row["name"])
         row["aliases"] = sorted(aliases)
@@ -108,7 +107,7 @@ def build_drug_dataset(root):
         "inchi",
         "description",
     ]
-    drugbank_df = pandas.DataFrame.from_dict(rows)[columns]
+    drugbank_df = pd.DataFrame.from_dict(rows)[columns]
 
     return drugbank_df
 
@@ -130,9 +129,7 @@ def build_protein_df(root, use_groups=False):
                 uniprot_ids = [
                     polypep.text
                     for polypep in protein.findall(
-                        "{ns}polypeptide/{ns}external-identifiers/{ns}external-identifier[{ns}resource='UniProtKB']/{ns}identifier".format(
-                            ns=ns
-                        )
+                        f"{ns}polypeptide/{ns}external-identifiers/{ns}external-identifier[{ns}resource='UniProtKB']/{ns}identifier"
                     )
                 ]
 
@@ -155,48 +152,110 @@ def build_protein_df(root, use_groups=False):
                 row["pubmed_ids"] = "|".join(pmids)
                 protein_rows.append(row)
 
-    protein_df = pandas.DataFrame.from_dict(protein_rows)
+    protein_df = pd.DataFrame.from_dict(protein_rows)
     protein_df.uniprot_id = protein_df.uniprot_id.str.split("|")
     protein_df = protein_df.explode("uniprot_id")
 
     return protein_df
 
 
-@click.command()
-@click.argument("xml_path", type=click.Path(exists=True))
-@click.argument("interim_folder", type=click.Path(exists=False))
-@click.argument("final_folder", type=click.Path(exists=False))
-@click.option("--use_groups", is_flag=True, default=False, help="number of greetings")
-def main(xml_path, interim_folder, final_folder, use_groups):
+@click.group()
+@click.option("--update/--no-update", default=False)
+@click.option("--drugbank-version")
+@click.option("--gtex-version")
+@click.argument("interim-folder", type=click.Path(exists=False))
+@click.argument("final-folder", type=click.Path(exists=False))
+@click.pass_context
+def main(ctx, drugbank_version, gtex_version, update, interim_folder, final_folder):
+    ctx.ensure_object(dict)
+    ctx.obj["DRUGBANK_VERSION"] = drugbank_version
+    ctx.obj["GTEX_VERSION"] = gtex_version
+    ctx.obj["UPDATE"] = update
+    ctx.obj["INTERIM_FOLDER"] = Path(interim_folder)
+    ctx.obj["FINAL_FOLDER"] = Path(final_folder)
+
+
+@main.command()
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--kind", type=click.Choice(["drugbank", "gtex"], case_sensitive=False))
+@click.pass_context
+def translate(ctx, path, kind):
+    path = Path(path)
+    basename = path.name.partition(".")[0]
+
+    kind = kind.lower()
+    if kind == "drugbank":
+        data = pd.read_csv(path, sep="\t")
+        ids = data["uniprot_id"].unique()
+        this_source = "uniprot"
+        this_target = "entrezgene"
+    elif kind == "gtex":
+        data = pd.read_feather(path)
+        ids = data.columns[data.columns.str.startswith("X")].str.replace("X", "")
+        this_source = "entrezgene"
+        this_target = "symbol"
+
+    genes_df = convert_gene_ids(ids, source=this_source, target=this_target)
+    today_str = datetime.today().strftime("%Y%m%d")
+    genes_df_fpath = ctx.obj["INTERIM_FOLDER"].joinpath(
+        f"{basename}_mygene-{today_str}.tsv"
+    )
+    genes_df.to_csv(genes_df_fpath, sep="\t", index=False)
+    print(f"Wrote {genes_df_fpath}")
+
+
+@main.command()
+@click.argument("drugbank-path", type=click.Path(exists=True))
+@click.argument("drugbank-genes-path", type=click.Path(exists=True))
+@click.argument("gtex-genes-path", type=click.Path(exists=True))
+@click.argument("gtex-path", type=click.Path(exists=True))
+@click.pass_context
+def filter(ctx, drugbank_path, drugbank_genes_path, gtex_genes_path):
+    data = pd.read_csv(drugbank_path, sep="\t")
+    genes_drugbank = pd.read_csv(drugbank_genes_path, sep="\t")
+    genes_gtex = pd.read_csv(gtex_genes_path, sep="\t")
+    data = (
+        data.merge(genes_drugbank, how="inner")
+        .merge(genes_gtex, how="inner")
+        .query(
+            (
+                'category=="target"'
+                ' & groups.str.contains("^approved")'
+                ' & (~groups.str.contains("withdrawn"))'
+                ' & organism=="Humans"'
+                ' & (known_action=="yes")'
+            )
+        )
+        .sort_values("drugbank_id")
+    )
+
+    version = ctx.obj["DRUGBANK_VERSION"]
+    genes_gtex[f"approved_{version}"] = genes_gtex.entrez_id.isin(data.entrez_id)
+
+
+@main.command()
+@click.argument("xml-path", type=click.Path(exists=True))
+@click.option("--use-groups", is_flag=True, default=False, help="number of greetings")
+@click.pass_context
+def parse(ctx, xml_path, use_groups):
     xml_path = Path(xml_path)
-    interim_folder = Path(interim_folder)
+    interim_folder = Path(ctx.obj["INTERIM_FOLDER"])
     interim_folder.mkdir(exist_ok=True)
 
-    basename = xml_path.with_name(xml_path.name.partition('.')[0])
+    basename = xml_path.name.partition(".")[0]
 
     with gzip.open(xml_path) as xml_file:
         tree = ET.parse(xml_file)
     root = tree.getroot()
 
     drugbank_df = build_drug_dataset(root)
-    # write drugbank tsv
-    drugbank_df_path = interim_folder.joinpath(f"{basename}_drugs.tsv")
-    drugbank_df.to_csv(drugbank_df_path, sep="\t", index=False)
-    print(f"Wrote {drugbank_df_path}")
 
     protein_df = build_protein_df(root, use_groups=use_groups)
-    protein_df_path = interim_folder.joinpath(f"{basename}_proteins.tsv")
-    protein_df.to_csv(protein_df_path, sep="\t", index=False)
-    print(f"Wrote {protein_df_path}")
 
     db_df = drugbank_df.merge(protein_df, how="inner")
-
-    genes_df = convert_uniprot_ids(db_df.uniprot_id.unique())
-    today_str = datetime.today().strftime("%Y%m%d")
-    genes_df_fpath = interim_folder.joinpath(f"{basename}_mygene-{today_str}.tsv")
-    genes_df.to_csv(genes_df_fpath, sep="\t", index=False)
-
-    db_df = db_df.merge(genes_df, how="left")
+    db_df_path = ctx.obj["INTERIM_FOLDER"].joinpath(f"{basename}.tsv")
+    db_df.to_csv(db_df_path, sep="\t", index=False)
+    print(f"Wrote {db_df_path}")
 
 
 if __name__ == "__main__":
