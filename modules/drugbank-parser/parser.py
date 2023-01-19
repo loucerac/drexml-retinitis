@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Model definition.
+adapted from https://github.com/dhimmel/drugbank/blob/gh-pages/parse.ipynb
+"""
 
 import collections
 import csv
@@ -15,6 +20,8 @@ import click
 import pandas as pd
 import requests
 from biothings_client import get_client
+
+THIS_VERSION=1.0
 
 
 def collapse_list_values(row):
@@ -160,28 +167,20 @@ def build_protein_df(root, use_groups=False):
 
 
 @click.group()
-@click.option("--update/--no-update", default=False)
-@click.option("--drugbank-version")
-@click.option("--gtex-version")
-@click.argument("interim-folder", type=click.Path(exists=False))
-@click.argument("final-folder", type=click.Path(exists=False))
-@click.pass_context
-def main(ctx, drugbank_version, gtex_version, update, interim_folder, final_folder):
-    ctx.ensure_object(dict)
-    ctx.obj["DRUGBANK_VERSION"] = drugbank_version
-    ctx.obj["GTEX_VERSION"] = gtex_version
-    ctx.obj["UPDATE"] = update
-    ctx.obj["INTERIM_FOLDER"] = Path(interim_folder)
-    ctx.obj["FINAL_FOLDER"] = Path(final_folder)
+def main():
+    """Drugbank parser for drexml.
+    """
+
+    print(f"Running drugbank parser {THIS_VERSION}")
 
 
 @main.command()
 @click.argument("path", type=click.Path(exists=True))
+@click.argument("output", type=click.Path(exists=True))
 @click.option("--kind", type=click.Choice(["drugbank", "gtex"], case_sensitive=False))
-@click.pass_context
-def translate(ctx, path, kind):
+def translate(path, output, kind):
     path = Path(path)
-    basename = path.name.partition(".")[0]
+    output = Path(output)
 
     kind = kind.lower()
     if kind == "drugbank":
@@ -197,20 +196,19 @@ def translate(ctx, path, kind):
 
     genes_df = convert_gene_ids(ids, source=this_source, target=this_target)
     today_str = datetime.today().strftime("%Y%m%d")
-    genes_df_fpath = ctx.obj["INTERIM_FOLDER"].joinpath(
-        f"{basename}_mygene-{today_str}.tsv"
-    )
-    genes_df.to_csv(genes_df_fpath, sep="\t", index=False)
-    print(f"Wrote {genes_df_fpath}")
+    genes_df["mygene_version"] = today_str
+    genes_df.to_csv(output, sep="\t", index=False)
+    print(f"Wrote {output}")
 
 
 @main.command()
-@click.argument("drugbank-path", type=click.Path(exists=True))
-@click.argument("drugbank-genes-path", type=click.Path(exists=True))
-@click.argument("gtex-genes-path", type=click.Path(exists=True))
-@click.argument("gtex-path", type=click.Path(exists=True))
-@click.pass_context
-def filter(ctx, drugbank_path, drugbank_genes_path, gtex_genes_path):
+@click.option("--drugbank-path", type=click.Path(exists=True))
+@click.option("--drugbank-genes-path", type=click.Path(exists=True))
+@click.option("--gtex-path", type=click.Path(exists=True))
+@click.option("--gtex-genes-path", type=click.Path(exists=True))
+@click.argument("drugbank_output", type=click.Path(exists=False))
+@click.argument("genes_output", type=click.Path(exists=False))
+def filter(drugbank_path, gtex_genes_path, drugbank_genes_path, drugbank_output, genes_output):
     data = pd.read_csv(drugbank_path, sep="\t")
     genes_drugbank = pd.read_csv(drugbank_genes_path, sep="\t")
     genes_gtex = pd.read_csv(gtex_genes_path, sep="\t")
@@ -229,20 +227,19 @@ def filter(ctx, drugbank_path, drugbank_genes_path, gtex_genes_path):
         .sort_values("drugbank_id")
     )
 
-    version = ctx.obj["DRUGBANK_VERSION"]
-    genes_gtex[f"approved_{version}"] = genes_gtex.entrez_id.isin(data.entrez_id)
+    data.to_csv(drugbank_output, sep="\t", index=False)
+
+    genes_drugbank["drugbank_approved_targets"] = genes_drugbank.entrez_id.isin(data.entrez_id.unique())
+    genes_drugbank.to_csv(genes_output, sep="\t", index=False)
+
 
 
 @main.command()
 @click.argument("xml-path", type=click.Path(exists=True))
+@click.argument("output", type=click.Path(exists=False))
 @click.option("--use-groups", is_flag=True, default=False, help="number of greetings")
-@click.pass_context
-def parse(ctx, xml_path, use_groups):
+def parse(xml_path, output, use_groups):
     xml_path = Path(xml_path)
-    interim_folder = Path(ctx.obj["INTERIM_FOLDER"])
-    interim_folder.mkdir(exist_ok=True)
-
-    basename = xml_path.name.partition(".")[0]
 
     with gzip.open(xml_path) as xml_file:
         tree = ET.parse(xml_file)
@@ -253,9 +250,8 @@ def parse(ctx, xml_path, use_groups):
     protein_df = build_protein_df(root, use_groups=use_groups)
 
     db_df = drugbank_df.merge(protein_df, how="inner")
-    db_df_path = ctx.obj["INTERIM_FOLDER"].joinpath(f"{basename}.tsv")
-    db_df.to_csv(db_df_path, sep="\t", index=False)
-    print(f"Wrote {db_df_path}")
+    db_df.to_csv(output, sep="\t", index=False)
+    print(f"Wrote {output}")
 
 
 if __name__ == "__main__":
