@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Model definition.
-adapted from https://github.com/dhimmel/drugbank/blob/gh-pages/parse.ipynb
+Drugbank parser.
+Adapted from https://github.com/dhimmel/drugbank/blob/gh-pages/parse.ipynb
 """
 
 import collections
-import csv
 import gzip
-import io
-import json
-import os
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -18,13 +14,18 @@ from pathlib import Path
 
 import click
 import pandas as pd
-import requests
 from biothings_client import get_client
 
-THIS_VERSION=1.0
+THIS_VERSION = 1.0
+
+
+def read_genes_df(path):
+    """Wrapper to fix NANs in entrex IDs (IEEE-int has no NA)."""
+    return pd.read_csv(path, sep="\t", dtype={"entrez_id": str})
 
 
 def collapse_list_values(row):
+    """Collapse cells containing lists into strings."""
     for key, value in row.items():
         if isinstance(value, list):
             row[key] = "|".join(value)
@@ -32,6 +33,7 @@ def collapse_list_values(row):
 
 
 def convert_gene_ids(gene_ids, source="entrezgene", target="uniprot,symbol"):
+    """Myege wrapper."""
     renamer = {
         "uniprot": "uniprot_id",
         "entrezgene": "entrez_id",
@@ -55,7 +57,7 @@ def convert_gene_ids(gene_ids, source="entrezgene", target="uniprot,symbol"):
 
 
 def build_drug_dataset(root):
-
+    """Parse Drugbank drugs from Drugbank XML root."""
     ns = "{http://www.drugbank.ca}"
     inchikey_template = (
         "{ns}calculated-properties/{ns}property[{ns}kind='InChIKey']/{ns}value"
@@ -120,6 +122,7 @@ def build_drug_dataset(root):
 
 
 def build_protein_df(root, use_groups=False):
+    """Parse Drugbank associated proteins from Drugbank XML root."""
     ns = "{http://www.drugbank.ca}"
 
     protein_rows = list()
@@ -143,9 +146,7 @@ def build_protein_df(root, use_groups=False):
                 if len(uniprot_ids) != 1:
                     if use_groups:
                         row["is_protein_group_target"] = True
-                        row["uniprot_id"] = "|".join(
-                            uniprot_id for uniprot_id in uniprot_ids
-                        )
+                        row["uniprot_id"] = "|".join(uniprot_ids)
                     else:
                         continue
                 else:
@@ -168,17 +169,19 @@ def build_protein_df(root, use_groups=False):
 
 @click.group()
 def main():
-    """Drugbank parser for drexml.
-    """
+    """Drugbank parser for drexml."""
 
     print(f"Running drugbank parser {THIS_VERSION}")
 
 
 @main.command()
 @click.argument("path", type=click.Path(exists=True))
-@click.argument("output", type=click.Path(exists=True))
+@click.argument("output", type=click.Path(exists=False))
 @click.option("--kind", type=click.Choice(["drugbank", "gtex"], case_sensitive=False))
 def translate(path, output, kind):
+    """Gene translation tool using mygene."""
+    print("Running mygene translation tool.")
+
     path = Path(path)
     output = Path(output)
 
@@ -195,23 +198,25 @@ def translate(path, output, kind):
         this_target = "symbol"
 
     genes_df = convert_gene_ids(ids, source=this_source, target=this_target)
-    today_str = datetime.today().strftime("%Y%m%d")
-    genes_df["mygene_version"] = today_str
     genes_df.to_csv(output, sep="\t", index=False)
     print(f"Wrote {output}")
 
 
 @main.command()
+@click.argument("drugbank-output", type=click.Path(exists=False), nargs=1)
+@click.argument("genes-output", type=click.Path(exists=False), nargs=1)
 @click.option("--drugbank-path", type=click.Path(exists=True))
 @click.option("--drugbank-genes-path", type=click.Path(exists=True))
-@click.option("--gtex-path", type=click.Path(exists=True))
 @click.option("--gtex-genes-path", type=click.Path(exists=True))
-@click.argument("drugbank_output", type=click.Path(exists=False))
-@click.argument("genes_output", type=click.Path(exists=False))
-def filter(drugbank_path, gtex_genes_path, drugbank_genes_path, drugbank_output, genes_output):
+def filter(
+    drugbank_output, genes_output, drugbank_path, drugbank_genes_path, gtex_genes_path
+):
+    """Filter the dataset using targets with a known action."""
+    print("Running drugbank target filter.")
+
     data = pd.read_csv(drugbank_path, sep="\t")
-    genes_drugbank = pd.read_csv(drugbank_genes_path, sep="\t")
-    genes_gtex = pd.read_csv(gtex_genes_path, sep="\t")
+    genes_drugbank = read_genes_df(drugbank_genes_path)
+    genes_gtex = read_genes_df(gtex_genes_path)
     data = (
         data.merge(genes_drugbank, how="inner")
         .merge(genes_gtex, how="inner")
@@ -229,9 +234,10 @@ def filter(drugbank_path, gtex_genes_path, drugbank_genes_path, drugbank_output,
 
     data.to_csv(drugbank_output, sep="\t", index=False)
 
-    genes_drugbank["drugbank_approved_targets"] = genes_drugbank.entrez_id.isin(data.entrez_id.unique())
-    genes_drugbank.to_csv(genes_output, sep="\t", index=False)
-
+    genes_gtex["drugbank_approved_targets"] = genes_gtex.entrez_id.isin(
+        data.entrez_id.unique()
+    )
+    genes_gtex.to_csv(genes_output, sep="\t", index=False)
 
 
 @main.command()
@@ -239,6 +245,8 @@ def filter(drugbank_path, gtex_genes_path, drugbank_genes_path, drugbank_output,
 @click.argument("output", type=click.Path(exists=False))
 @click.option("--use-groups", is_flag=True, default=False, help="number of greetings")
 def parse(xml_path, output, use_groups):
+    """Drugbank parse XML and save to TSV."""
+    print("Running XML parser.")
     xml_path = Path(xml_path)
 
     with gzip.open(xml_path) as xml_file:
