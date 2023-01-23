@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
-MYGENE_VERSION=$( date +%Y%m%d )
+UPDATE_GENE_INFO=false
+if [ "$UPDATE_GENE_INFO" = true ] ; then
+    MYGENE_VERSION=$( date +%Y%m%d )
+    echo "Update Mygene version to ${MYGENE_VERSION}"
+else
+    MYGENE_VERSION="20230120"
+    echo "Using Mygene version ${MYGENE_VERSION}"
+fi
 GTEX_VERSION="V8"
 DRUGBANK_VERSION="v050108"
-UPDATE=0
 
 THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 DATA_PATH="$THIS_FOLDER/data"
@@ -32,13 +38,14 @@ python ${PARSER_FOLDER}/parser.py parse $XML_PATH $TSV_PATH
 if test -f "$DB_GENES_PATH"; then
     echo "$DB_GENES_PATH exists."
 else
-    python ${PARSER_FOLDER}/parser.py translate $TSV_PATH $DB_GENES_PATH --kind drugbank 
-fi
-
-if test -f "$GTEX_GENES_PATH"; then
-    echo "$GTEX_GENES_PATH exists."
-else
-    python ${PARSER_FOLDER}/parser.py translate $PARQUET_PATH $GTEX_GENES_PATH --kind gtex 
+    echo "$DB_GENES_PATH does no exist."
+    if [ "$UPDATE_GENE_INFO" = true ] ; then
+        echo "Updating Mygene"
+        python ${PARSER_FOLDER}/parser.py translate $TSV_PATH $DB_GENES_PATH --kind drugbank 
+        python ${PARSER_FOLDER}/parser.py translate $PARQUET_PATH $GTEX_GENES_PATH --kind gtex 
+    else
+        echo "Either search for the corresponding Mygene $MYGENE_VERSION$ file or set UPDATE to true. Then, launch again the script."
+    fi
 fi
 
 python ${PARSER_FOLDER}/parser.py filter \
