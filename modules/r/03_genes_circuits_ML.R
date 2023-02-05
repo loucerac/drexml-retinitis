@@ -1,13 +1,14 @@
 #### GET GENES AND PATHWAYS FOR MACHINE LEARNING ####
 
-if (!require(pacman)) {
-  install.packages("pacman")
-  library(pacman)
-} else {
-  library(pacman)
-}
-
-p_load("magrittr", "here", "hipathia", "AnnotationDbi", "org.Hs.eg.db", "data.table", "VarfromPDB", "openxlsx", "feather")
+library("magrittr")
+library("here")
+library("hipathia")
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+library("data.table")
+library("VarfromPDB")
+library("openxlsx")
+library("feather")
 
 #### 1. Get disease ORPHA-genes  ####
 
@@ -41,8 +42,10 @@ entrezIDgenes_ORPHA <- data.frame(
 # get a list of genes by pathway from pathigraphs object
 
 metaginfo <- hipathia::load_pathways("hsa")
-path_list <- read.table(file = here("data", "raw", "physiological_paths.tsv"), sep = "\t") ## Load physiological pathways to filter them
-pathways <- hipathia:::filter_pathways(metaginfo, pathways_list = as.character(path_list[, 2])) ## Filter only physiological pathways
+## Load physiological pathways to filter them
+path_list <- read.table(file = here("data", "raw", "physiological_paths.tsv"), sep = "\t")
+## Filter only physiological pathways
+pathways <- hipathia:::filter_pathways(metaginfo, pathways_list = as.character(path_list[, 2]))
 
 
 # iterate through pathigraph subgraphs getting all the genesList (entrez)
