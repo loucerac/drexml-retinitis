@@ -24,7 +24,7 @@ hpo_tab <- hpo_tab[, which(colSums(hpo_tab != "") != 0)] %>% remove_constant(.)
 hpo_tab <- hpo_tab[, -11]
 
 ## v.2019
-colnames(hpo_tab) <- c("db", "code", "disease", "hpo_qualifier", "hpo_id", "disease_resource", "evidence", "hpo_cc_onset", "hpo_freq", "aspect", "origin", "freq") 
+colnames(hpo_tab) <- c("db", "code", "disease", "hpo_qualifier", "hpo_id", "disease_resource", "evidence", "hpo_cc_onset", "hpo_freq", "aspect", "origin", "freq")
 
 
 terms <- lapply(hpo_tab$hpo_id, function(x) get_term_property(hpo, "name", x)) %>%
@@ -38,7 +38,7 @@ hpo_tab$term_id <- terms$term
 
 ## Load phenotype_to_genes.txt file from HPOdb (downloaded in local)
 ## Obtained from https://hpo.jax.org/app/data/annotations version 2019
-hpo2genes <- data.frame(read.delim(skip = 1, file = (here("data", "raw", "phenotype_to_genes20191010.txt")), fill = T, header = F, sep = "\t"), stringsAsFactors = T) 
+hpo2genes <- data.frame(read.delim(skip = 1, file = (here("data", "raw", "phenotype_to_genes20191010.txt")), fill = T, header = F, sep = "\t"), stringsAsFactors = T)
 colnames(hpo2genes) <- c("hpo_id", "term_id", "entrez", "symbol")
 
 hpo_genes_long <- data.frame(aggregate(cbind(hpo2genes$entrez) ~ as.character(hpo2genes$hpo_id), data = hpo2genes, FUN = paste), stringsAsFactors = F)
@@ -76,12 +76,12 @@ hpo_tab <- hpo_tab[-base::grep("*obsolete*", hpo_tab$term_id), ]
 ## Filter only HPO associated with ORPHA diseases
 hpo_or <- hpo_tab[hpo_tab$origin == "orphadata", ]
 # erase duplicated info and empty columns
-hpo_or_p <- hpo_or[hpo_or$aspect == "P", -c(1, 2, 6, 11)] 
+hpo_or_p <- hpo_or[hpo_or$aspect == "P", -c(1, 2, 6, 11)]
 table(hpo_or_p$aspect)
 
 
 ## Add gene - HPO relations to the hpo_or_p table of ORPHA phenotypic_ab HPO codes.
 ## Tabla con ORPHAdis_HPO_pheno_ab_entrez_levels
-hpo_or_p$entrezs <- hpo_genes_long$entrez_id[match(hpo_or_p$hpo_id, hpo_genes_long$HPO)] 
+hpo_or_p$entrezs <- hpo_genes_long$entrez_id[match(hpo_or_p$hpo_id, hpo_genes_long$HPO)]
 
 saveRDS(hpo_or_p, file = here("data", "interim", "hpo_or_p_entrezs05122019.rds"))
