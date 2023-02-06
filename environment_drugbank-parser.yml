@@ -1,4 +1,4 @@
-name: /home/carlos/github/drexml-retinitis/.venvs/drugbank-parser
+name: drugbank-parser
 channels:
   - conda-forge
   - defaults

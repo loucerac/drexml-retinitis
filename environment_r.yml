@@ -1,4 +1,4 @@
-name: /home/carlos/github/drexml-retinitis/.venvs/r
+name: r
 channels:
   - conda-forge
   - defaults

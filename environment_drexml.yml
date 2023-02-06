@@ -1,4 +1,4 @@
-name: /home/carlos/github/drexml-retinitis/.venvs/drexml
+name: drexml
 channels:
   - defaults
 dependencies:
