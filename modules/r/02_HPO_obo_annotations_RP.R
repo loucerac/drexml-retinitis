@@ -77,8 +77,12 @@ hpo_tab <- hpo_tab[-base::grep("*obsolete*", hpo_tab$term_id), ]
 hpo_or <- hpo_tab[hpo_tab$origin == "orphadata", ]
 # erase duplicated info and empty columns
 #TODO: always use column names (except in linear algebra)
-hpo_or_p <- hpo_or[hpo_or$aspect == "P", -c(1, 2, 6, 11)]
-table(hpo_or_p$aspect)
+# hpo_or_p <- hpo_or[hpo_or$aspect == "P", -c(1, 2, 6, 11)]
+hpo_or_p <- hpo_or[hpo_or$aspect == "P", -c(1, 2, 11)]
+#ERROR: 6 points to `disease_resource` which is later used in `modules/r/03_genes_circuits_ML.R`
+# programatic way of removing duplicated columns (keeps the first)
+#hpo_or <- hpo_or[!duplicated(as.list(hpo_or))]
+# table(hpo_or_p$aspect)
 
 
 ## Add gene - HPO relations to the hpo_or_p table of ORPHA phenotypic_ab HPO codes.
