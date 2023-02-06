@@ -185,3 +185,6 @@ rsconnect/
 data/
 nohup*
 results/
+
+# CONDA
+codaenv*
