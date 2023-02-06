@@ -24,11 +24,10 @@ table_genes <- genes_HPO_disease[!duplicated(genes_HPO_disease[, "GeneName"]), ]
   subset(., .$GeneName != "") %>%
   .[, -5]
 
-if (!dir.exists("./results/tables")) {
-  dir.create("./results/tables")
-}
+tables_dir <- here("results", "tables")
+dir.create(tables_dir, showWarnings = FALSE, recursive=TRUE)
 
-write.xlsx(table_genes, file = here("results", "tables", paste0("genes_", disease, ".xlsx")), row.names = F)
+write.xlsx(table_genes, file = file.path(tables_dir, paste0("genes_", disease, ".xlsx")), row.names = F)
 
 genes_ORPHA_disease <- as.character(unique(subset(genes_HPO_disease$GeneName, (genes_HPO_disease$GeneName != ""))))
 entrezIDgenes_ORPHA <- data.frame(
@@ -76,6 +75,10 @@ subpathways.list <- lapply(pathways$pathigraphs, function(x) {
 })
 subpathways <- as.data.frame(unlist(subpathways.list))
 colnames(subpathways) <- "hipathia"
+# R uses the anmes of a list as rownames. Threfore we end woth pathways ids
+# as row indices instead of either a unique int range or the circuit ids,
+# which are unique by construction. Thus, we fix it
+rownames(subpathways) <- subpathways$hipathia
 
 # Table of all Hipathia pathways with orpha_genes
 cualpath_dis <- function(genes, pathway) {
@@ -96,7 +99,7 @@ paths_disease <- names(entrez.list)[paths_disease]
 
 dis_circuits <- subpathways.list[paths_disease]
 
-write.xlsx(paths_disease, file = here("results", "tables", paste0("pathways_", short_dis, ".xls")), row.names = F, col.names = T)
+write.xlsx(paths_disease, file = file.path(tables_dir, paste0("pathways_", short_dis, ".xls")), row.names = F, col.names = T)
 
 
 ## Get circuits with orpha_genes
@@ -143,7 +146,7 @@ cir_af <- data.frame(
   Hipathia_code = af_cir$ind[af_cir$values == T], stringsAsFactors = F
 )
 
-write.xlsx(cir_af, file = here("results", "tables", paste0("circuits_ORPHA", short_dis, ".xls")), row.names = F, col.names = T)
+write.xlsx(cir_af, file = file.path(tables_dir, paste0("circuits_ORPHA", short_dis, ".xls")), row.names = F, col.names = T)
 
 #### 4. HPO- disease related genes ####
 ## Load table of HPO-orpha disesases- genes from HPOdb.obo and phenotype files tagged with levels and genes  (obtained in scrip HPO_obo_annotations.R)
@@ -169,7 +172,7 @@ hpos_RD <- HPOdb[HPOdb$disease_resource == orphacode_RD, ]
 
 hpo_codes <- hpos_RD$hpo_id[hpos_RD$level >= 7] ## Select HPO>= 7 of specificity
 
-write.xlsx(hpos_RD[hpos_RD$level >= 7, c(2, 8, 9)], file = here("results", "tables", "hpos_RP.xlsx"), row.names = F)
+write.xlsx(hpos_RD[hpos_RD$level >= 7, c(2, 8, 9)], file = file.path(tables_dir, "hpos_RP.xlsx"), row.names = F)
 
 ## Get entrezs with all RD HPOs as tag (22)
 
@@ -182,7 +185,7 @@ sum(entrezs_allRDHPO %in% metaginfo$all.genes)
 
 df_allRDHPO <- data.frame(Gene_symbol = mapIds(org.Hs.eg.db, keys = entrezs_allRDHPO, column = "SYMBOL", keytype = "ENTREZID"), Entrez = entrezs_allRDHPO)
 
-write.xlsx(df_allRDHPO, file = here("results", "tables", "genes_22RDHPO.xls"), row.names = F)
+write.xlsx(df_allRDHPO, file = file.path(tables_dir, "genes_22RDHPO.xls"), row.names = F)
 
 ## Get entrezs with 14/22 RD HPOs as tag
 which_cir14 <- function(entrez_disease, circuit) {
@@ -243,7 +246,7 @@ entrezs_10RDHPO <- as.character(genes_hpo_long$entrez_id[index10_entrezs])
 sum(entrezs_10RDHPO %in% pathways$all.genes)
 
 df_10RDHPO <- data.frame(Gene_symbol = mapIds(org.Hs.eg.db, keys = entrezs_10RDHPO, column = "SYMBOL", keytype = "ENTREZID"), Entrez = entrezs_10RDHPO)
-write.xlsx(df_10RDHPO, file = here("results", "tables", "genes_10RDHPO.xls"), row.names = F)
+write.xlsx(df_10RDHPO, file = file.path(tables_dir, "genes_10RDHPO.xls"), row.names = F)
 
 
 ## Get entrezs with 8/22 RD HPOs as tag
@@ -265,7 +268,7 @@ entrezs_8RDHPO <- as.character(genes_hpo_long$entrez_id[index8_entrezs])
 sum(entrezs_8RDHPO %in% pathways$all.genes)
 
 df_8RDHPO <- data.frame(Gene_symbol = mapIds(org.Hs.eg.db, keys = entrezs_8RDHPO, column = "SYMBOL", keytype = "ENTREZID"), Entrez = entrezs_8RDHPO)
-write.xlsx(df_8RDHPO, file = here("results", "tables", "genes_8RDHPO.xls"), row.names = F)
+write.xlsx(df_8RDHPO, file = file.path(tables_dir, "genes_8RDHPO.xls"), row.names = F)
 
 
 ## Add ORPHA RD entrezs with HPO related entrez (Select as filter genes that share 10/22 HPOs with the disease RP) ###
@@ -279,7 +282,7 @@ paths_RD <- sapply(names(entrez.list), function(x) {
 
 paths_RD <- names(entrez.list)[paths_RD]
 
-write.xlsx(path_list[as.character(path_list$V2) %in% paths_RD, ], file = here("results", "tables", "paths_RD.xls"), row.names = F)
+write.xlsx(path_list[as.character(path_list$V2) %in% paths_RD, ], file = file.path(tables_dir, "paths_RD.xls"), row.names = F)
 
 # Get circuits from pathways with RD genes.
 
@@ -304,7 +307,7 @@ cir_RD_names <- data.frame(
   Hipathia_code = RD_cir$ind[RD_cir$values == T], stringsAsFactors = F
 )
 
-write.xlsx(cir_RD_names, file = here("results", "tables", paste0("cirHPO", disease, ".xlsx")), row.names = F)
+write.xlsx(cir_RD_names, file = file.path(tables_dir, paste0("cirHPO", disease, ".xlsx")), row.names = F)
 
 ## Table of All Hipathia circuits and disease affected circuits (ORPHA+HPO)
 circuits <- cbind(subpathways, subpathways$hipathia %in% RD_cir$ind[RD_cir$values == T])
@@ -323,5 +326,5 @@ save_feather <- function(x, path) {
 
 save_feather(
   circuits,
-  file.path(here("data", "final", paste0("circuits_", short_dis, ".rds.feather")))
+  here("data", "final", paste0("circuits_", short_dis, ".rds.feather"))
 )
