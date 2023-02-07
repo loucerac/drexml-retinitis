@@ -4,16 +4,13 @@
 ### Processing GTEx V8 datasets #####
 #########################################
 
-if (!require(pacman)) {
-  install.packages("pacman")
-  library(pacman)
-} else {
-  library(pacman)
-}
+library(here)
+library(hipathia)
+library(feather)
+library(edgeR)
+library(data.table)
 
 # Load  RNA-seq expression set from GTEx *.gct file.
-
-pacman::p_load("here", "hipathia", "feather", "edgeR", "data.table")
 
 ## Read the downloaded GTEx raw counts dataset
 expreset_raw <- fread(
