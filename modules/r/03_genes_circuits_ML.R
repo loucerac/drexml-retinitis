@@ -1,3 +1,5 @@
+#!/usr/bin/env RScript
+
 #### GET GENES AND PATHWAYS FOR MACHINE LEARNING ####
 
 library("magrittr")

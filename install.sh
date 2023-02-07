@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 PARSER_ENV_FOLDER="./.venvs/drugbank-parser"
 conda env update --prune -p ${PARSER_ENV_FOLDER} -f environment_drugbank-parser.yml
 
