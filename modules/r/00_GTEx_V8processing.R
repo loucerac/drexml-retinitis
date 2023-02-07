@@ -14,7 +14,7 @@ library(data.table)
 
 ## Read the downloaded GTEx raw counts dataset
 expreset_raw <- fread(
-  file = "./data/raw/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct",
+  file = here("data", "raw", "GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct"),
   header = T, sep = "\t"
 ) %>% as.data.frame(.)
 
@@ -42,7 +42,8 @@ exp_data <- normalize_data(trans_data)
 
 ## Loading Pathways (only physiological)
 
-path_list <- read.table(file = here("data", "raw", "physiological_paths.tsv"), sep = "\t") # physiological_pathways
+# physiological_pathways
+path_list <- read.table(file = here("data", "raw", "physiological_paths.tsv"), sep = "\t")
 pathways <- load_pathways("hsa", pathways_list = path_list[, 2])
 
 ## Using Hipathia to compute the signal
