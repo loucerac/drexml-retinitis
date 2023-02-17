@@ -10,6 +10,10 @@ library(feather)
 library(edgeR)
 library(data.table)
 
+dir.create(here("data", "interim"), showWarnings = FALSE, recursive=TRUE)
+dir.create(here("data", "final"), showWarnings = FALSE, recursive=TRUE)
+
+
 # Load  RNA-seq expression set from GTEx *.gct file.
 
 ## Read the downloaded GTEx raw counts dataset
