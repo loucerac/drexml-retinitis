@@ -68,12 +68,12 @@ save_feather <- function(x, path) {
 
 
 save_feather(
-  exp_data,
+  t(exp_data),
   file.path(here("data", "final", "expreset_Hinorm_gtexV8.rds.feather"))
 )
 
 
 save_feather(
-  path_vals,
+  t(path_vals),
   file.path(here("data", "final", "expreset_pathvals_gtexV8.rds.feather"))
 )
