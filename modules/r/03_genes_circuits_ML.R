@@ -13,35 +13,47 @@ library("openxlsx")
 library("feather")
 
 #### 1. Get disease ORPHA-genes  ####
-localPDB_path <- here("data", "interim", "localPDB")
-
-tryCatch(
-    {
-      localPDB(
-        localPDB.path = localPDB_path, PDB = "all",
-        omim.url = "ftp://ftp.ncbi.nih.gov/gene/DATA/gene2refseq.gz", 
-        download.method = "curl_fetch_disk"
-      )
-      print("Success downloading and creating localPDB.")
-    },
-    #if an error occurs, tell me the error
-    error=function(e) {
-        print(e)
-        print("Error while downloading localPDB, use copy from assets.")
-        dir.create(localPDB_path, showWarnings = FALSE, recursive=TRUE)
-        files_to_copy <- list.files(here("data", "assets", "localPDB"), full.names=TRUE)
-        file.copy(files_to_copy, localPDB_path, overwrite=TRUE)
-    },
-    warning=function(w) {
-        print(w)
-        return(NA)
-    }
-)
-
-
+UPDATE <- FALSE
 disease <- "Retinitis pigmentosa"
 short_dis <- "RP"
-genes_HPO_disease <- pheno_extract_HPO(disease, localPDB.path = localPDB_path)
+
+localPDB_path <- here("data", "interim", "localPDB")
+
+if (UPDATE==TRUE) {
+  tryCatch(
+      {
+        localPDB(
+          localPDB.path = localPDB_path, PDB = "all",
+          omim.url = "ftp://ftp.ncbi.nih.gov/gene/DATA/gene2refseq.gz", 
+          download.method = "curl_fetch_disk"
+        )
+        print("Success downloading and creating localPDB.")
+      },
+      #if an error occurs, tell me the error
+      error=function(e) {
+          print(e)
+          print("Error while downloading localPDB, use copy from assets.")
+          dir.create(localPDB_path, showWarnings = FALSE, recursive=TRUE)
+          files_to_copy <- list.files(here("data", "assets", "localPDB"), full.names=TRUE)
+          file.copy(files_to_copy, localPDB_path, overwrite=TRUE)
+      },
+      warning=function(w) {
+          print(w)
+          return(NA)
+      },
+      finally=function(f) {
+        genes_HPO_disease <- pheno_extract_HPO(disease, localPDB.path = localPDB_path)
+        saveRDS(genes_HPO_disease, file = here("data", "assets", "genes_HPO_disease.rds"))  
+      }
+  )
+} else {
+  file.copy(
+    here("data", "assets", "genes_HPO_disease.rds"),
+    here("data", "interim", "genes_HPO_disease.rds"),
+    overwrite=TRUE)
+  genes_HPO_disease <- readRDS(here("data", "interim", "genes_HPO_disease.rds"))
+}
+
 table_genes <- genes_HPO_disease[!duplicated(genes_HPO_disease[, "GeneName"]), ] %>%
   subset(., .$GeneName != "") %>%
   .[, -5]
