@@ -3,15 +3,14 @@
 #####################################################################################
 
 if (!require(pacman, quietly = TRUE)){
-  install.packages(pacman)
+  install.packages("pacman")
   library(pacman)
 }else{
   library(pacman)
 }
 
-
 library(pacman)
-p_load(here, data.table, stringr, dplyr, ontologyIndex, janitor )
+p_load("here", "data.table", "stringr", "dplyr", "ontologyIndex", "janitor" )
 
 
 ## Load HPO OBO ontology file  

@@ -105,7 +105,7 @@ dev.off()
 scores_KDTS <- data.frame(score = apply(shap_relevant_stable, 2, function(x) mean(abs(x)))) %>% rownames_to_column("KDT") %>% .[order(.$score, decreasing = T),]
 
 top30_boxplot_df <- data.frame(t(mat[, scores_KDTS$KDT[1:30]])) %>%  rownames_to_column("KDT") %>% pivot_longer(-KDT) %>% filter(value!=0) %>% 
-  add_column(SIGN = ifelse(.$value > 0, "POSITVE", "NEGATIVE"))  %>% pivot_longer(-KDT)
+  add_column(SIGN = ifelse(.$value > 0, "POSITVE", "NEGATIVE"))
 top30_boxplot_df$value <- abs(top30_boxplot_df$value)
 top30_boxplot_df$KDT <- reorder(top30_boxplot_df$KDT, -top30_boxplot_df$value, FUN = median) ## order boxplots to obtain decreasing medians
 top30_boxplot_df$SIGN <- factor(top30_boxplot_df$SIGN, levels = c("POSITVE", "NEGATIVE"))
