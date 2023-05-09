@@ -1,6 +1,6 @@
 ############################################
 ## Project: RP DRexML
-## Script purpose:  Plot Heatmaps of relevan KDTs x stable circuits with annotations. Export KDTs tables. Plot hallmark ballon plot.
+## Script purpose:  Plot Heatmaps of relevan KDTs x stable circuits with annotations. Export KDTs tables. Plot hallmark balloon plot.
 ## Date: 25.02.2023
 ## Author: Marina Esteban-Medina
 #######################################
@@ -13,8 +13,6 @@ if (!require(pacman, quietly = TRUE)){
 
 pacman::p_load("here", "rentrez","hipathia", "utils", "stringr", "AnnotationDbi", "org.Hs.eg.db",
                "dplyr","tidyr", "openxlsx", "data.table", "scales", "NMF", "tibble", "ggplot2", "fmsb")
-
-
 
 if(!dir.exists(here("results/tables"))){
   dir.create(here("results/tables"))
@@ -58,6 +56,14 @@ annot_testAheatmap <- function(matrix, annotations, title, anot_colors, colors_m
                 annColors = anot_colors )
 }
 
+shap_scaled <- t(apply(shap, 1, function(x) x/max(abs(x)))) 
+shap_scaled<- shap_scaled[rownames(shap_relevant_stable), colnames(shap_relevant_stable)]
+  
+png(here("results","figures","heatmap_SHAP_RP2023_full_abstract.png"), height = 8000, width = 8000, res = 500)
+NMF::aheatmap(shap_scaled, color = "-RdYlBu", border_color = "white", Rowv = T, Colv = T, ## If we set Rowv and Colv to false it will cluster qwith hclust funct.
+              cexCol = 4, cexRow = 10)
+dev.off()
+
 
 ## Select colors for drug effects
 annot.color.col <- list('Drug_effect'=c('green','lightblue', "purple", "black", "grey"))
@@ -93,6 +99,58 @@ annot_testAheatmap(matrix = relevant_yesno, annotations = drug_ef[drug_ef$symbol
 dev.off()
 
 
+########## STUDY OF KDT SCORES ##########
+
+## Boxplots of top scored KDTs
+scores_KDTS <- data.frame(score = apply(shap_relevant_stable, 2, function(x) mean(abs(x)))) %>% rownames_to_column("KDT") %>% .[order(.$score, decreasing = T),]
+
+top30_boxplot_df <- data.frame(t(mat[, scores_KDTS$KDT[1:30]])) %>%  rownames_to_column("KDT") %>% pivot_longer(-KDT) %>% filter(value!=0) %>% 
+  add_column(SIGN = ifelse(.$value > 0, "POSITVE", "NEGATIVE"))  %>% pivot_longer(-KDT)
+top30_boxplot_df$value <- abs(top30_boxplot_df$value)
+top30_boxplot_df$KDT <- reorder(top30_boxplot_df$KDT, -top30_boxplot_df$value, FUN = median) ## order boxplots to obtain decreasing medians
+top30_boxplot_df$SIGN <- factor(top30_boxplot_df$SIGN, levels = c("POSITVE", "NEGATIVE"))
+
+png(here("results","figures","boxplots_top30_kdt_score.png"), height = 8000, width = 12000, res = 500)
+  ggplot(data =  top30_boxplot_df, aes(x = KDT, y = value,  fill= SIGN))+
+    geom_boxplot(stat = "boxplot")+  
+    theme_minimal()+
+    theme(legend.title =  element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.y = element_text(size = 40, family = "special", hjust = 1, colour = "black"),
+          axis.text.x = element_text(size = 35, family = "helvetica",colour = "black", angle = 90, hjust = 1, vjust = 1),
+          axis.title.x = element_blank(),
+          legend.text = element_text(size = 35),
+          legend.key.size = unit(2,"cm"))
+dev.off()
+
+## Assess the distribution of the KDT signs and scores
+kdt_scores <- as.data.frame(t(mat)) %>% rownames_to_column(.,"KDTS") %>% pivot_longer(-KDTS) %>% 
+  add_column("SIGN"= ifelse(.$value > 0, "POSITIVE", "NEGATIVE")) %>% add_column("path"= sapply(str_split(.$name, ": "), function(x) x[[1]])) %>% filter(.,value != 0)
+kdt_scores$path[grep("pathway", kdt_scores$path, invert = T)] <- paste(kdt_scores$path[grep("pathway", kdt_scores$path, invert = T)], "pathway", sep = " ") ## Add the word pathway to the path names
+# kdt_scores$value <-  abs(kdt_scores$value)
+kdt_scores <- kdt_scores[order(abs(kdt_scores$value), decreasing = F), ]
+kdt_scores$KDTS <- reorder(kdt_scores$KDTS, -abs(kdt_scores$value), FUN = sum, decreasing = T) ### Order the KDTs
+  
+# png(here("results","figures","kdts_scores_hori.png"), height = 8000, width = 12000, res = 500)
+# png(here("results","figures","kdts_scores_vertical.png"), height = 12000, width = 8000, res = 500)
+png(here("results","figures","kdts_scores_stacked_vertical_onlyrelevant.png"), height = 12000, width = 8000, res = 500)
+ggplot(data=kdt_scores, aes(x= KDTS, y= value, fill= SIGN))+
+  geom_bar(stat="identity")+
+  # geom_text(aes(label = percentage), hjust = -0.1, size = 2, family = "candara", colour = "#040f42" )+
+  theme_classic()+
+  theme(legend.title =  element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 15, family = "helvetica", hjust = 1, colour = "black"),
+        axis.text.x = element_text(size = 20, family = "helvetica",colour = "black"),
+        axis.title.x = element_blank(),
+        legend.text = element_text(size = 16))+
+  coord_flip()+
+   scale_y_continuous(limits = c(-100,60), breaks = seq(-100, 60, 10))+ ## When stacked
+  # scale_y_continuous(limits = c(-100,100))+ ## when non stacked
+  scale_fill_manual(values = c("#4575B4","#F46D43"))
+dev.off()
+
+
 ##############################################################################################
 #########    TABLES PAPER 
 ###########################################################
@@ -111,6 +169,7 @@ dim(table_x1)
 table_x1$Pharmacological.action[grep("other|unknown", table_x1$Pharmacological.action)] <-  "unknown"
 table_x1$Pharmacological.action[which(table_x1$Pharmacological.action == "") ] <-  "unknown"
 
+
 write.xlsx(table_x1, file = here("results", "tables","Table_X1_genesDrugs.xlsx"))
 
 ## Genes experimentally validated
@@ -127,6 +186,7 @@ annotations_eff <- read.delim(here("data/raw/physPathsAnnot.tsv")) ##  GO annota
 
 ## First we read again the shap_entrez to have the values withour rescaling for the Heatmaps
 shap_relevant_stable_notscaled <- shap_relevant_stable %>% add_column(circuit_code = rownames(shap_entrez_relevant_stable))
+saveRDS(shap_relevant_stable_notscaled ,file =  here("rds","shap_relevant_stable_notscaled_hallmarks.rds"))
 
 any(apply(shap_relevant_stable, 2, sum) == 0)
 
@@ -169,7 +229,7 @@ for(i in unique(pivot_shapRel$KDT) ){
   
 }
 
-# saveRDS(df_kdts, here("rds", "Table_X2_circuits_functions_kdts.rds"))
+saveRDS(df_kdts, here("rds", "Table_X2_circuits_functions_kdts.rds"))
 openxlsx::write.xlsx(df_kdts , file = here("results", "tables","Table_X2_circuits_functions_kdts.xlsx"))
 
 
@@ -185,114 +245,3 @@ for(i in unique(vali) ){
 }
 
 openxlsx::write.xlsx(df_kdts_vali , file = here("results", "tables","Table_X2_circuits_functions_kdts_validated.xlsx"))
-
-
-################################################################################################
-##### PLOTS: SELECTION OF CIRCUIT FUNCTIONS FOR FUNCTIONAL MODULE ANALYSIS #######
-#############################################################################################
-
-## READ MANUALLY CURATED HALLMARKS 
-hallmarks_circuits_anot <-  read.xlsx(xlsxFile =  "./data/final/RP_map_functions_MPC-annot.xlsx") %>% .[,-c(1,3,13,14,15)] %>% column_to_rownames(., "circuit_name")%>%
-  apply(., 2, function(x) ifelse(is.na(x), F, T)) %>% as.data.frame(.)
-
-
-## Here I am recounting to see how many hallmarks we have summarized by PATHWAY
-n_cir <- data.frame(table(sapply(str_split(rownames(hallmarks_circuits_anot), ": "), function(x) x[1]))) # get the nº of circuit per pathway to obtain normalized Freq of Hallmark per pathway
-n_hallmark <- data.frame(hallmark = colnames(hallmarks_circuits_anot), total = apply(hallmarks_circuits_anot, 2, sum))
-
-table_pathways <- add_column(hallmarks_circuits_anot, "pathway" = sapply(str_split(rownames(hallmarks_circuits_anot), ": "), function(x) x[1])) %>% pivot_longer(cols = -pathway) %>% 
-  mutate(value = case_when(value == "TRUE" ~ 1,
-                           value == "FALSE" ~ 0))  %>% group_by(pathway, name) %>%  summarize(count = sum(value)) %>% .[-which(.$count == 0),] %>%
-  add_column(n_cir = n_cir$Freq[match(.$pathway, n_cir$Var1)]) %>% ## add nº of circuit a pathway has in the RP map to normalized the plot
-  add_column(total_hallmark = n_hallmark$total[match(.$name, n_hallmark$hallmark)])
-
-table_pathways$percentage_Inpathway <- (table_pathways$count/table_pathways$n_cir)*100 ## Percentage of the hallmark normalized per nº of circuit the pathway has
-table_pathways$percentage_perHallm <- (table_pathways$count/table_pathways$total_hallmark)*100 ## Percentage of the hallmark normalized by ttoal annotations fo that hallmark in the RP_map
-
-
-length(unique(table_pathways$pathway)) # 40 pathways
-
-## Make table pretty for : BALLOON  plot of Pathways and  9 hallmaarks of RP
-table_pathways_pretty <- table_pathways  ## Make the names pretty for the plot
-table_pathways_pretty$pathway[grep("pathway",table_pathways_pretty$pathway, invert = T)] <- paste0(table_pathways_pretty$pathway[grep("pathway",table_pathways_pretty$pathway, invert = T)], " signaling pathway")
-table_pathways_pretty$name <- gsub("\\.", " ",table_pathways_pretty$name)
-table_pathways_pretty$percentage_Inpathway <- round(table_pathways_pretty$percentage_Inpathway, digits = 0) ## Presence of the hallmark in the pathway: Ex 10Apoptosis_pathwayA / 5 circ_pathwayA
-table_pathways_pretty$percentage_perHallm <- round(table_pathways_pretty$percentage_perHallm , digits = 0) ## Percentage of the hallmark from total annotations of that hallmark : Ex 10Apoptosis_pathwayA / 138_totalApopAnot  
-colnames(table_pathways_pretty) <- c("Pathway", "Hallmark", "count", "n_cir","total_hallmark" ,"Presence", "Percentage") 
-colnames(table_pathways) <- c("Pathway", "Hallmark", "count", "n_cir","total_hallmark" ,"Presence", "Percentage") 
-
-## Balloon plot
-balloon <- table_pathways_pretty %>% ggplot(aes(x = Hallmark, y = Pathway )) +
-  geom_point(aes(size = n_cir, color = Percentage)) +
-  scale_size_continuous(limits = c(1, max(table_pathways_pretty$n_cir)), range = c(1,8) ) +
-  labs(x = NULL, y = NULL) +
-  theme_light()+
-  scale_color_gradient(low = "grey", high = "darkblue")+
-  theme(legend.text = element_text(size = 16, family = "Helvetica"), legend.title = element_text(size = 22, family = "Helvetica"),
-        axis.text.x = element_text(size = 15, family = "Helvetica", angle = 30, hjust = 1), 
-        axis.text.y =  element_text(size = 15, family = "Helvetica"))+
-  guides(fill = guide_legend(override.aes = list(size=8)))
-
-png(here("results", "figures","balloonplot_pathway_hallmarks_onecolor_grad.png"), height = 8000, width = 8000, res = 500)
-balloon
-dev.off()
-
-### Create the table of circuits and hallmarks in a long format
-hallmarks_stable_circuits_anot <- hallmarks_circuits_anot[which(rownames(hallmarks_circuits_anot) %in% rownames(shap_relevant_stable)) ,] ## Binary col = Halmarks T/F, rows=stable_cirs 
-
-table_hallmarks_circuit <- hallmarks_stable_circuits_anot %>% 
-  rownames_to_column(., "circuit") %>%
-  pivot_longer(cols = -circuit) %>% 
-  mutate(value = case_when(value == "TRUE" ~ 1,
-                           value == "FALSE" ~ 0))  %>% group_by(circuit, name) %>% .[-which(.$value == 0),-which(colnames(.)=="value")]
-colnames(table_hallmarks_circuit) <- c("circuit", "Module")
-table_hallmarks_circuit$Module <- gsub("\\.", " ",table_hallmarks_circuit$Module)
-
-length(unique(table_hallmarks_circuit$circuit)) ## 203 /207 annotated
-
-
-#### Create pivot table with SHAP + drugbank + functional annotations + modules ##########
-
-## Export table with drugs and effects
-pivot_shapRel_drugbank_functions <- pivot_shapRel %>% merge(.,table_pathways, by.x = "KEGG.Pathway", by.y = "Pathway") %>% merge(., drugbank_effects_tar[,c(10,1,2,3,4,9)], by.x = "KDT", by.y = "symbol")%>% add_column("Module"= table_hallmarks_circuit$Module[match(.$circuit, table_hallmarks_circuit$circuit)])
-colnames(pivot_shapRel_drugbank_functions) <- gsub("name", "DRUG",colnames(pivot_shapRel_drugbank_functions) )
-
-write.table(pivot_shapRel_drugbank_functions, file = here("results", "tables", "ALLpivot_cir_funct_KDT_shapScore_drug_table.tsv"), sep = "\t", quote = F, col.names = T, row.names = F)
-saveRDS(pivot_shapRel_drugbank_functions, here("rds", "ALLpivot_cir_funct_KDT_shapScore_drug_table.rds"))
-
-length(unique(pivot_shapRel_drugbank_functions$KDT))
-
-## Export only validated 
-pivot_shapRel_drugbank_functions_validated <- filter(pivot_shapRel_drugbank_functions, KDT %in% vali)
-length(unique(pivot_shapRel_drugbank_functions_validated$KDT)) ## check (6)
-
-write.table(pivot_shapRel_drugbank_functions_validated, file = here("results", "tables" ,"Validated_pivot_cir_funct_KDT_shapScore_drug_table.tsv"), sep = "\t", quote = F, col.names = T, row.names = F)
-saveRDS(pivot_shapRel_drugbank_functions_validated, here("rds", "Validated_pivot_cir_funct_KDT_shapScore_drug_table.rds"))
-
-
-#### GET KDTS x Hallmarks (in % of presence) for RADAR, HEATMAP and SPIDER plot ####
-
-## KDTS ##
-relevant_KDTbyfunc <- rownames_to_column(hallmarks_circuits_anot, "circuit") %>% merge(., distinct(pivot_shapRel_drugbank_functions[,c(1,4)])) %>% .[, -c(1)]  %>% pivot_longer(cols = -KDT) %>%
-  mutate(value = case_when(value == "TRUE" ~ 1,
-                           value == "FALSE" ~ 0))  %>% group_by(KDT, name) %>%
-  summarize(count = sum(value)) %>% .[-which(.$count == 0),] %>%
-  pivot_wider(names_from = name , values_from = count ) %>% column_to_rownames("KDT")## Here we transform the DF into a matrix of counts of hallmark per KDT
-relevant_KDTbyfunc[is.na(relevant_KDTbyfunc)] <- 0
-relevant_KDTbyfunc <- rbind( TOTAL = n_hallmark$total[match(colnames(relevant_KDTbyfunc),n_hallmark$hallmark)] ,relevant_KDTbyfunc) %>% 
-  .[, c("Fatty.acid.and.lipid.metabolism", "Apoptosis", "Neuronal", "DNA.integrity" ,"Inflammatory.response", "Stress.response","Necrosis", "Development","Sensory.and.stimuli.transduction")] ## reorder according to hallmark circle
-
-saveRDS(relevant_KDTbyfunc, file = here("rds", "relevant_KDTbyfunc.rds"))
-
-
-## DRUGS ##
-drug_byfunc <- rownames_to_column(hallmarks_circuits_anot, "circuit") %>% merge(., distinct(pivot_shapRel_drugbank_functions[,c(4,18)])) %>% .[, -c(1)]  %>% pivot_longer(cols = -DRUG) %>%
-  mutate(value = case_when(value == "TRUE" ~ 1,
-                           value == "FALSE" ~ 0))  %>% group_by(DRUG, name) %>%
-  summarize(count = sum(value)) %>% .[-which(.$count == 0),] %>%
-  pivot_wider(names_from = name , values_from = count ) %>% column_to_rownames("DRUG") ## Here we transform the DF into a matrix of counts of hallmark per KDT
-drug_byfunc[is.na(drug_byfunc)]<- 0
-drug_byfunc <- rbind( TOTAL = n_hallmark$total[match(colnames(drug_byfunc),n_hallmark$hallmark)] ,drug_byfunc) %>%
-  .[, c("Fatty.acid.and.lipid.metabolism", "Apoptosis", "Neuronal", "DNA.integrity" ,"Inflammatory.response", "Stress.response","Necrosis", "Development","Sensory.and.stimuli.transduction")] ## reorder according to hallmark circle
-
-saveRDS(drug_byfunc, file = here("rds", "drug_byfunc.rds"))

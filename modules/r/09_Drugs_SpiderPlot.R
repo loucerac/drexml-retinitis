@@ -32,7 +32,7 @@ relevant_KDTbyfunc <- readRDS(file = here("rds", "relevant_KDTbyfunc.rds"))
 
 drug_byfunc<- readRDS(file = here("rds", "drug_byfunc.rds"))
 
-## Transform the count of hallmarks in percentage of the hallmark represented in a KDT or drug
+## Transform count of hallmarks in percentage of the hallmark represented in a KDT or drug.
 relevant_KDTbyfunc_percent <- apply(relevant_KDTbyfunc, 2, function(x) round(x/max(x)*100)) %>% data.frame(.)
 drug_byfunc_percent <- apply(drug_byfunc, 2, function(x) round(x/max(x)*100)) %>% data.frame(.) 
 
