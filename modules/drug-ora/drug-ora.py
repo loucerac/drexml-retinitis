@@ -7,16 +7,12 @@ import dotenv
 import numpy as np
 import pandas as pd
 from scipy import stats
+from statsmodels.stats.multitest import multipletests
 
 
 def fdr(pvalues):
     """Benjamini-Hochberg FDR p-value correction for multiple hypothesis testing."""
-    pvalues = np.asfarray(pvalues)
-    by_descend = pvalues.argsort()[::-1]
-    by_orig = by_descend.argsort()
-    steps = float(len(pvalues)) / np.arange(len(pvalues), 0, -1)
-    pvalues_adjusted = np.minimum(1, np.minimum.accumulate(steps * pvalues[by_descend]))
-    return pvalues_adjusted[by_orig]
+    return multipletests(pvalues, alpha=0.05, method="fdr_bh")[1]
 
 
 np.random.seed(42)
