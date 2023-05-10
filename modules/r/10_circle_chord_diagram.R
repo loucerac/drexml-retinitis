@@ -16,12 +16,6 @@ if(!dir.exists(here("results/figures"))){
 
 ha_ha <- readRDS( here("rds", "hallmarks_byhallmarks.rds"))
 
-ATC1_byfunc<- readRDS(file = here("rds", "ATC1_byfunc.rds"))
-ATC2_byfunc<- readRDS(file = here("rds", "ATC2_byfunc.rds"))
-
-ATC1_percentage <-  apply(ATC1_byfunc, 2, function(x) round(x/max(x)*100)) %>% data.frame(.)
-ATC2_percentage <-  apply(ATC2_byfunc, 2, function(x) round(x/max(x)*100)) %>% data.frame(.)
-
 grid.col <- c("#FFFF33", "#E41A1C", "#984EA3","#4DAF4A", "#FF7F00", "#999999", "#A65628", "#377EB8","#F781BF") ## Set the colors in proper order (like in the spiderplot) from palette Set1
 grid.col <- setNames(grid.col, colnames(ha_ha))
 
