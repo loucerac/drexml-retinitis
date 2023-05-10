@@ -186,6 +186,7 @@ data/
 nohup*
 results/
 logs/
+rds/
 
 # CONDA
 codaenv*
