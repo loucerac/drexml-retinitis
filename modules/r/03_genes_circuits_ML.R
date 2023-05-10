@@ -5,7 +5,7 @@ if (!require(pacman)) {
   library(pacman)
 }else{ library(pacman)}
 
-p_load("magrittr", "here", "hipathia", "AnnotationDbi", "org.Hs.eg.db", "data.table", "VarfromPDB", "openxlsx", "feather")
+p_load("magrittr", "here", "hipathia", "AnnotationDbi", "org.Hs.eg.db", "data.table", "VarfromPDB", "openxlsx", "feather","tidyr", "tibble", "ggplot2", "dplyr")
 
 #### 1. Get disease ORPHA-genes  ####
 
@@ -237,7 +237,7 @@ genes_sharingHPO <- data.frame(shared_hpos = seq_along(1: length(hpo_codes)), co
 
 for (i in 1: length(hpo_codes)){
   
-  which_cir <- function(entrez_disease,circuit){
+  which_cir_i <- function(entrez_disease,circuit){
     
     w <- intersect(entrez_disease, circuit)
     
@@ -247,7 +247,7 @@ for (i in 1: length(hpo_codes)){
     
   }
   
-  index[[i]] <- sapply(genes_hpo_long$HPO, function(x){ which_cir(hpo_codes, x )})
+  index[[i]] <- sapply(genes_hpo_long$HPO, function(x){ which_cir_i(hpo_codes, x )})
   genes_select[[i]] <- as.character(genes_hpo_long$entrez_id [index[[i]] ])
   
   genes_sharingHPO$count[i] <- sum( genes_select[[i]] %in% pathways$all.genes) 
