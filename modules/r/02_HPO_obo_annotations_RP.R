@@ -2,15 +2,12 @@
 ######## ORGANIZE AND ANNOTATE HPO TERMS RELATED WITH GENES AND DISEASES ############
 #####################################################################################
 
-if (!require(pacman, quietly = TRUE)){
-  install.packages("pacman")
-  library(pacman)
-}else{
-  library(pacman)
-}
-
-library(pacman)
-p_load("here", "data.table", "stringr", "dplyr", "ontologyIndex", "janitor" )
+library("here")
+library("data.table")
+library("stringr")
+library("dplyr")
+library("ontologyIndex")
+library("janitor")
 
 
 ## Load HPO OBO ontology file  

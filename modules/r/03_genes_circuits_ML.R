@@ -1,11 +1,18 @@
 #### GET GENES AND PATHWAYS FOR MACHINE LEARNING ####
 
-if (!require(pacman)) {
-  install.packages("pacman")
-  library(pacman)
-}else{ library(pacman)}
-
-p_load("magrittr", "here", "hipathia", "AnnotationDbi", "org.Hs.eg.db", "data.table", "VarfromPDB", "openxlsx", "feather","tidyr", "tibble", "ggplot2", "dplyr")
+library("magrittr")
+library("here")
+library("hipathia")
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+library("data.table")
+library("VarfromPDB")
+library("openxlsx")
+library("feather")
+library("tidyr")
+library("tibble")
+library("ggplot2")
+library("dplyr")
 
 #### 1. Get disease ORPHA-genes  ####
 

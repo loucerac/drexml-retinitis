@@ -5,14 +5,22 @@
 ## Author: Marina Esteban-Medina
 #######################################
 
-if (!require(pacman, quietly = TRUE)){
-  install.packages(pacman)
-}else{
-  library(pacman)
-}
-
-pacman::p_load("here", "rentrez","hipathia", "utils", "stringr", "AnnotationDbi", "org.Hs.eg.db",
-               "dplyr","tidyr", "openxlsx", "data.table", "scales", "NMF", "tibble", "ggplot2", "fmsb")
+library("here")
+library("rentrez")
+library("hipathia")
+library("utils")
+library("stringr")
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+library("dplyr")
+library("tidyr")
+library("openxlsx")
+library("data.table")
+library("scales")
+library("NMF")
+library("tibble")
+library("ggplot2")
+library("fmsb")
 
 if(!dir.exists(here("results/tables"))){
   dir.create(here("results/tables"))
@@ -38,9 +46,11 @@ drugbank_effects_tar<- readRDS(here("rds", "drugbank_effects_tar.rds")) ## Load 
 
 vali <- c("ALOX5", "ELOVL4", "GABRA1", "GRIN1", "SLC12A5", "GLRA2") ## 6 validated KDTs
 
-hallmarks_circuits_anot <-  read.xlsx(xlsxFile =  "./data/final/RP_map_functions_MPC-annot.xlsx") %>% .[,-c(1,3,13,14,15)] %>% column_to_rownames(., "circuit_name")%>%
-  apply(., 2, function(x) ifelse(is.na(x), F, T)) %>% as.data.frame(.)
-
+hallmarks_circuits_anot <-  read.xlsx(xlsxFile =  "./data/final/RP_map_functions_MPC-annot.xlsx") %>% 
+  .[,-c(1,3,13,14,15)] %>%
+  column_to_rownames(., "circuit_name") %>%
+  apply(., 2, function(x) ifelse(is.na(x), F, T)) %>% 
+  as.data.frame(.)
 
 ## Here I am recounting to see how many hallmarks we have summarized by PATHWAY ###
 n_cir <- data.frame(table(sapply(str_split(rownames(hallmarks_circuits_anot), ": "), function(x) x[1]))) # get the nº of circuit per pathway to obtain normalized Freq of Hallmark per pathway

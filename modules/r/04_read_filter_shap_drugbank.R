@@ -5,14 +5,24 @@
 ## Author: Marina Esteban-Medina
 #######################################
 
-if (!require(pacman, quietly = TRUE)){
-  install.packages(pacman)
-}else{
-  library(pacman)
-}
-
-pacman::p_load("here", "rentrez","hipathia", "utils", "stringr", "AnnotationDbi", "org.Hs.eg.db",
-               "dplyr","tidyr", "openxlsx", "data.table", "scales", "NMF", "tibble", "ggplot2", "fmsb", "venn", "ggpolypath")
+library("here")
+library("rentrez")
+library("hipathia")
+library("utils")
+library("stringr")
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+library("dplyr")
+library("tidyr")
+library("openxlsx")
+library("data.table")
+library("scales")
+library("NMF")
+library("tibble")
+library("ggplot2")
+library("fmsb")
+library("venn")
+library("ggpolypath")
 
 
 if(!dir.exists(here("results/tables"))){

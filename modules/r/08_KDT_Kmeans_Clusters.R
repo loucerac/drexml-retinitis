@@ -5,13 +5,13 @@
 ## Author: Marina Esteban-Medina
 #######################################
 
-if (!require(pacman, quietly = TRUE)){
-  install.packages(pacman)
-}else{
-  library(pacman)
-}
-
-p_load("here","cluster", "factoextra","NbClust","tidyr", "tibble", "NMF")
+library("here")
+library("cluster")
+library("factoextra")
+library("NbClust")
+library("tidyr")
+library("tibble")
+library("NMF")
 
 
 if(!dir.exists(here("results/tables"))){

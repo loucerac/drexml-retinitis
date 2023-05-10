@@ -5,14 +5,18 @@
 ## Author: Marina Esteban-Medina
 #######################################
 
+library("here")
+library("stringr")
+library("dplyr")
+library("tidyr")
+library("openxlsx")
+library("NMF")
+library("ggnewscale")
+library("ggplot2")
+library("tibble")
+library("gmodels")
+library("RColorBrewer")
 
-if (!require(pacman, quietly = TRUE)){
-  install.packages(pacman)
-}else{
-  library(pacman)
-}
-
-pacman::p_load("here", "stringr", "dplyr","tidyr", "openxlsx", "NMF", "ggnewscale", "ggplot2", "tibble", "gmodels", "RColorBrewer")
 
 #### 1. READ TABLE OF CATEGEORIES FROM ATC  #### Downloaded from https://bioportal.bioontology.org/ontologies/ATC 2022AB CSV file
 

@@ -5,13 +5,16 @@
 ## Author: Marina Esteban-Medina
 #######################################
 
-if (!require(pacman, quietly = TRUE)){
-  install.packages(pacman)
-}else{
-  library(pacman)
-}
-
-pacman::p_load("here", "stringr", "dplyr","tidyr", "openxlsx", "NMF", "ggnewscale", "ggplot2", "fmsb", "tibble")
+library("here")
+library("stringr")
+library("dplyr")
+library("tidyr")
+library("openxlsx")
+library("NMF")
+library("ggnewscale")
+library("ggplot2")
+library("fmsb")
+library("tibble")
 
 
 if(!dir.exists(here("results/tables"))){

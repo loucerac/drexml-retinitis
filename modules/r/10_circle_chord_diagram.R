@@ -5,8 +5,8 @@
 ## Author: Marina Esteban-Medina
 #######################################
 
+library(circlize)
 
-p_load(circlize)
 
 if(!dir.exists(here("results/figures"))){
   dir.create(here("results/figures"))
