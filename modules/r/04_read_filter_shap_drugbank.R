@@ -24,22 +24,25 @@ library("fmsb")
 library("venn")
 library("ggpolypath")
 
-
-if(!dir.exists(here("results/tables"))){
-  dir.create(here("results/tables"))
+tables_folder <- here("results", "tables")
+if(!dir.exists(tables_folder)){
+  dir.create(tables_folder)
 }
 
-if(!dir.exists(here("results/figures"))){
-  dir.create(here("results/figures"))
+figures_folder <- here("results", "figures")
+if(!dir.exists(figures_folder)){
+  dir.create(figures_folder)
 }
 
-if(!dir.exists(here("rds"))){
-  dir.create(here("rds"))
+rds_folder <- here("results", "rds")
+if(!dir.exists(rds_folder)){
+  dir.create(rds_folder)
 }
 
 #### 1. Load SHAP model results and filter ########
 
-pathways <- hipathia::load_pathways("hsa")## First of all Load pathways from hipathia R package
+## First of all Load pathways from hipathia R package
+pathways <- hipathia::load_pathways("hsa")
 
 data_folder = here("results","ml")
 
