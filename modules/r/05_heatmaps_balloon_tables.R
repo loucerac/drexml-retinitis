@@ -22,24 +22,28 @@ library("tibble")
 library("ggplot2")
 library("fmsb")
 
-if(!dir.exists(here("results/tables"))){
-  dir.create(here("results/tables"))
+tables_folder <- here("results", "tables")
+if(!dir.exists(tables_folder)){
+  dir.create(tables_folder)
 }
 
-if(!dir.exists(here("results/figures"))){
-  dir.create(here("results/figures"))
+figures_folder <- here("results", "figures")
+if(!dir.exists(figures_folder)){
+  dir.create(figures_folder)
 }
 
-if(!dir.exists(here("rds"))){
-  dir.create(here("rds"))
+rds_folder <- here("results", "rds")
+if(!dir.exists(rds_folder)){
+  dir.create(rds_folder)
 }
+
 ### 1. Read SHAP and DRUGGANK filtered data ####
+
+data_folder = here("results", "ml")
 
 pathways <- hipathia::load_pathways("hsa")## First of all Load pathways from hipathia R package
 
 ## Load the relevance scores matrix with the threshold selection matrix for filtering ###
-data_folder = here("results","ml")
-
 shap <- fread(file = file.path(data_folder,"shap_summary_symbol.tsv"), header = T) %>% as.data.frame()
 rownames(shap)<- shap$circuit_name
 shap <- shap[ ,-1]
@@ -49,12 +53,12 @@ rownames(threshold) <- threshold$circuit_name
 threshold <- threshold[ ,-1]
 
 ## Load the filtered matrix with stable circuits and relevant KDTs
-shap_relevant_stable <- read.delim(here("results/tables/shap_relevant_stable.tsv"))
-shap_entrez_relevant_stable <- read.delim( here("results/tables/shap_entrez_relevant_stable.tsv"))
+shap_relevant_stable <- read.delim(file.path(tables_folder, "shap_relevant_stable.tsv"))
+shap_entrez_relevant_stable <- read.delim(file.path(tables_folder, "shap_entrez_relevant_stable.tsv"))
 
 ## Load the drug_eff DF from Drugbank DB
-drugbank_effects_tar<- readRDS(here("rds", "drugbank_effects_tar.rds"))
-drug_ef<- read.delim(here("results/tables/drugEffects_KDT_relevant_stable_simpl.tsv"))
+drugbank_effects_tar<- readRDS(file.path(rds_folder, "drugbank_effects_tar.rds"))
+drug_ef<- read.delim(file.path(tables_folder, "drugEffects_KDT_relevant_stable_simpl.tsv"))
 
 
 ### 2.  Prepare heatMap function with drug effect annotations using NMF R pack #
@@ -67,7 +71,7 @@ annot_testAheatmap <- function(matrix, annotations, title, anot_colors, colors_m
 shap_scaled <- t(apply(shap, 1, function(x) x/max(abs(x)))) 
 shap_scaled<- shap_scaled[rownames(shap_relevant_stable), colnames(shap_relevant_stable)]
   
-png(here("results","figures","heatmap_SHAP_RP2023_full_abstract.png"), height = 8000, width = 8000, res = 500)
+png(file.path(figures_folder, "heatmap_SHAP_RP2023_full_abstract.png"), height = 8000, width = 8000, res = 500)
 NMF::aheatmap(shap_scaled, color = "-RdYlBu", border_color = "white", Rowv = T, Colv = T, ## If we set Rowv and Colv to false it will cluster qwith hclust funct.
               cexCol = 4, cexRow = 10)
 dev.off()
@@ -85,7 +89,7 @@ dim(mat) ## 207 cir, 109 KDTs
 
 
 ## Plot the score HeatMap with the drug effect annotations on top
-png(here("results","figures","heatmap_relevancesSHAP_RP2023_full_divMax_drugEffect.png"), height = 8000, width = 8000, res = 500)
+png(file.path(figures_folder, "heatmap_relevancesSHAP_RP2023_full_divMax_drugEffect.png"), height = 8000, width = 8000, res = 500)
 annot_testAheatmap(matrix = mat, annotations = drug_ef[drug_ef$symbol %in% colnames(shap_relevant_stable),], anot_colors = annot.color.col,
                    title = "RELEVANCE SCORE OF RELEVANT KDTs x RP circuits \n Score of how relevant is each KDT for the activity of each circuit with sign")
 
@@ -100,7 +104,7 @@ relevant_yesno <- shap_relevant_stable
 relevant_yesno[which(relevant_yesno != 0, arr.ind = T)] <- 1
 
 ## Plot the score HeatMap with the drug effect annotations on top
-png(here("results", "figures","heatmap_yesnorelevancesSHAP_RP2023_drugEffect.png"), height = 8000, width = 8000, res = 500)
+png(file.path(figures_folder, "heatmap_yesnorelevancesSHAP_RP2023_drugEffect.png"), height = 8000, width = 8000, res = 500)
 annot_testAheatmap(matrix = relevant_yesno, annotations = drug_ef[drug_ef$symbol %in% colnames(relevant_yesno),], anot_colors = annot.color.col,  colors_main = "-topo",
                    title = "RELEVANCE SCORE OF RELEVANT KDTs x RP circuits \n Score of how relevant is each KDT for the activity of each circuit with sign")
 
@@ -118,7 +122,7 @@ top30_boxplot_df$value <- abs(top30_boxplot_df$value)
 top30_boxplot_df$KDT <- reorder(top30_boxplot_df$KDT, -top30_boxplot_df$value, FUN = median) ## order boxplots to obtain decreasing medians
 top30_boxplot_df$SIGN <- factor(top30_boxplot_df$SIGN, levels = c("POSITVE", "NEGATIVE"))
 
-png(here("results","figures","boxplots_top30_kdt_score.png"), height = 8000, width = 12000, res = 500)
+png(file.path(figures_folder, "boxplots_top30_kdt_score.png"), height = 8000, width = 12000, res = 500)
   ggplot(data =  top30_boxplot_df, aes(x = KDT, y = value,  fill= SIGN))+
     geom_boxplot(stat = "boxplot")+  
     theme_minimal()+
@@ -139,9 +143,7 @@ kdt_scores$path[grep("pathway", kdt_scores$path, invert = T)] <- paste(kdt_score
 kdt_scores <- kdt_scores[order(abs(kdt_scores$value), decreasing = F), ]
 kdt_scores$KDTS <- reorder(kdt_scores$KDTS, -abs(kdt_scores$value), FUN = sum, decreasing = T) ### Order the KDTs
   
-# png(here("results","figures","kdts_scores_hori.png"), height = 8000, width = 12000, res = 500)
-# png(here("results","figures","kdts_scores_vertical.png"), height = 12000, width = 8000, res = 500)
-png(here("results","figures","kdts_scores_stacked_vertical_onlyrelevant.png"), height = 12000, width = 8000, res = 500)
+png(file.path(figures_folder, "kdts_scores_stacked_vertical_onlyrelevant.png"), height = 12000, width = 8000, res = 500)
 ggplot(data=kdt_scores, aes(x= KDTS, y= value, fill= SIGN))+
   geom_bar(stat="identity")+
   # geom_text(aes(label = percentage), hjust = -0.1, size = 2, family = "candara", colour = "#040f42" )+
@@ -178,7 +180,7 @@ table_x1$Pharmacological.action[grep("other|unknown", table_x1$Pharmacological.a
 table_x1$Pharmacological.action[which(table_x1$Pharmacological.action == "") ] <-  "unknown"
 
 
-write.xlsx(table_x1, file = here("results", "tables","Table_X1_genesDrugs.xlsx"))
+write.xlsx(table_x1, file = file.path(tables_folder,"Table_X1_genesDrugs.xlsx"))
 
 ## Genes experimentally validated
 vali <- c("ALOX5", "ELOVL4", "GABRA1", "GRIN1", "SLC12A5", "GLRA2") ## 6
@@ -187,14 +189,14 @@ index_vali <- unlist(sapply(vali, function(x) grep(x, table_x1$Gene)))
 table_x1_onlyValidated <- table_x1[index_vali, ]
 length(unique(table_x1_onlyValidated$Gene)) ## check that we have all (6)
 
-write.xlsx(table_x1_onlyValidated, file = here("results", "tables", "Table_X1_genesDrugs_onlyValidated.xlsx"))
+write.xlsx(table_x1_onlyValidated, file = file.path(tables_folder, "Table_X1_genesDrugs_onlyValidated.xlsx"))
 
 ### 3.  Table X2, cols : KEGG pathway, circuit eff, Function; per rel KDT: is Relevant, Value.
-annotations_eff <- read.delim(here("data/raw/physPathsAnnot.tsv")) ##  GO annotations of effectors from GO db 2022
+annotations_eff <- read.delim(here("data","raw", "physPathsAnnot.tsv")) ##  GO annotations of effectors from GO db 2022
 
 ## First we read again the shap_entrez to have the values withour rescaling for the Heatmaps
 shap_relevant_stable_notscaled <- shap_relevant_stable %>% add_column(circuit_code = rownames(shap_entrez_relevant_stable))
-saveRDS(shap_relevant_stable_notscaled ,file =  here("rds","shap_relevant_stable_notscaled_hallmarks.rds"))
+saveRDS(shap_relevant_stable_notscaled, file =  file.path(rds_folder,"shap_relevant_stable_notscaled_hallmarks.rds"))
 
 any(apply(shap_relevant_stable, 2, sum) == 0)
 
@@ -237,8 +239,8 @@ for(i in unique(pivot_shapRel$KDT) ){
   
 }
 
-saveRDS(df_kdts, here("rds", "Table_X2_circuits_functions_kdts.rds"))
-openxlsx::write.xlsx(df_kdts , file = here("results", "tables","Table_X2_circuits_functions_kdts.xlsx"))
+saveRDS(df_kdts, file.path(rds_folder,"Table_X2_circuits_functions_kdts.rds"))
+openxlsx::write.xlsx(df_kdts , file = file.path(tables_folder,"Table_X2_circuits_functions_kdts.xlsx"))
 
 
 df_kdts_vali <- list()
@@ -252,4 +254,4 @@ for(i in unique(vali) ){
   
 }
 
-openxlsx::write.xlsx(df_kdts_vali , file = here("results", "tables","Table_X2_circuits_functions_kdts_validated.xlsx"))
+openxlsx::write.xlsx(df_kdts_vali , file.path(tables_folder,"Table_X2_circuits_functions_kdts_validated.xlsx"))

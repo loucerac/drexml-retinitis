@@ -17,6 +17,20 @@ library("tibble")
 library("gmodels")
 library("RColorBrewer")
 
+tables_folder <- here("results", "tables")
+if(!dir.exists(tables_folder)){
+  dir.create(tables_folder)
+}
+
+figures_folder <- here("results", "figures")
+if(!dir.exists(figures_folder)){
+  dir.create(figures_folder)
+}
+
+rds_folder <- here("results", "rds")
+if(!dir.exists(rds_folder)){
+  dir.create(rds_folder)
+}
 
 #### 1. READ TABLE OF CATEGEORIES FROM ATC  #### Downloaded from https://bioportal.bioontology.org/ontologies/ATC 2022AB CSV file
 
@@ -41,7 +55,7 @@ drugbank_app_action <- drugbank_alltar[-(base::grep("withdrawn",drugbank_alltar$
   .[(base::grep("yes", .$known_action)),] %>% .[.$organism == "Humans",]### version 5.1.8 from parser 2022 used to predict
 
 
-drug_byfunc<- readRDS(file = here("rds", "drug_byfunc.rds")) ## relevant drugs
+drug_byfunc<- readRDS(file = file.path(rds_folder, "drug_byfunc.rds")) ## relevant drugs
 
 drugbank_relevants <- drugbank_app_action %>% .[which(.$name %in% rownames(drug_byfunc)), ] ## Filtering the relevant drugs from all the assessed
 
@@ -166,7 +180,7 @@ data_fisherTest_level2 <- tidyr::unnest(drugs_ATC[, c("DRUG","ATC_LEVEL2")], col
 data_fisherTest_level1 <- tidyr::unnest(drugs_ATC[, c("DRUG","ATC_LEVEL1")], cols = c(ATC_LEVEL1))  %>% add_column("Relevant" = .$DRUG %in% drugs_ATC_rel$DRUG)
 
 ## Load ORA results from ATC levels 1,2,3,4 ###
-ora_ATC <- read.delim(file =here("results", "tables","selected_drugs_atc_ora.tsv")) %>% filter(ora_bylevel_pval_adj<0.05) %>% 
+ora_ATC <- read.delim(file = file.path(tables_folder,"selected_drugs_atc_ora.tsv")) %>% filter(ora_bylevel_pval_adj<0.05) %>% 
   .[order(.$ ora_bylevel_pval_adj, decreasing = F ), ] %>% .[order(.$atc_level, decreasing = F), ]
 
 ### STACKED BARPLOTS OVEREPRESENTED FOR CATEGORIES 2, 3, 4 ####
@@ -186,8 +200,8 @@ ATC_4_together$percentage[which(ATC_4_together$name == "ALL DRUGBANK")] <- NA ##
 
 ATC_4_together <- ATC_4_together[-which(ATC_4_together$ATC_level4 %in% c("Antipropulsives")),] ## REMOVE
 
-# png(here("results/figures/Relevant_ATC4_stacked.png"), height = 16000, width = 8000, res = 500)## FOR ALL RELEVANT
-png(here("results/figures/ORA_Relevant_ATC4_stacked.png"), height = 3200, width = 14000, res = 500)## FOR ORA RELEVANT
+# png(file.path(figures_folder,"Relevant_ATC4_stacked.png"), height = 16000, width = 8000, res = 500)## FOR ALL RELEVANT
+png(file.path(figures_folder, "ORA_Relevant_ATC4_stacked.png"), height = 3200, width = 14000, res = 500)## FOR ORA RELEVANT
 # Stacked barplot with multiple groups
 ggplot(data=ATC_4_together, aes(x= ATC_level4, y= value, fill= name))+
   geom_bar(stat="identity")+
@@ -221,7 +235,7 @@ ATC_3_together$percentage[which(ATC_3_together$name == "ALL DRUGBANK")] <- NA ##
 
 ATC_3_together <- ATC_3_together[-which(ATC_3_together$ATC_level3 %in% c("ANTIPROPULSIVES", "DRUGS FOR CONSTIPATION")),] ## REMOVE
 
-png(here("results/figures/ORA_Relevant_ATC3_stacked.png"), height = 3000, width = 14000, res = 500)
+png(file.path(figures_folder,"ORA_Relevant_ATC3_stacked.png"), height = 3000, width = 14000, res = 500)
 # Stacked barplot with multiple groups
 ggplot(data=ATC_3_together, aes(x= ATC_level3, y= value, fill= name))+
   geom_bar(stat="identity")+
@@ -249,7 +263,7 @@ ATC_2_together$percentage[which(ATC_2_together$name == "ALL DRUGBANK") ] <- NA #
 ATC_2_together <- ATC_2_together[-which(ATC_2_together$ATC_level2 %in% c("ANTIPROPULSIVES", "DRUGS FOR CONSTIPATION")),] ## REMOVE
 
 
-png(here("results/figures/ORA_Relevant_ATC2_stacked.png"), height = 2000, width = 14000, res = 500)
+png(file.path(figures_folder,"ORA_Relevant_ATC2_stacked.png"), height = 2000, width = 14000, res = 500)
 # Stacked barplot with multiple groups
 ggplot(data=ATC_2_together, aes(x= ATC_level2, y= value, fill= name))+
   geom_bar(stat="identity")+
@@ -278,7 +292,7 @@ colnames(ATC_1_together) <- c("ATC_level1", "ALL DRUGBANK", "RELEVANT DRUGS")
 ATC_1_together <- pivot_longer(ATC_1_together, cols = -ATC_level1 ) %>% add_column(percentage = ATC1_rel_percentage$percent[ match(.$ATC_level1, ATC1_rel_percentage$ATC)] )
 ATC_1_together$percentage[which(ATC_1_together$name == "ALL DRUGBANK") ] <- NA ## Delete labels of ALL and 0% to clean the plot
 
-png(here("results/figures/ORA_Relevant_ATC1_stacked.png"), height = 1000, width = 10000, res = 500)
+png(file.path(figures_folder, "ORA_Relevant_ATC1_stacked.png"), height = 1000, width = 10000, res = 500)
 # Stacked barplot with multiple groups
 ggplot(data= ATC_1_together, aes(x= ATC_level1, y= value, fill= name))+
   geom_bar(stat="identity")+
@@ -300,7 +314,7 @@ dev.off()
 #### ADD OVER REPRESENTATED DRUGS TO THE TABLES THAT CONTAINED RELEVANT KDTS #####
 
 ## Add the ATC_level 1 and 2 terms to the big table
-pivot_shapRel_drugbank_functions <- readRDS(here("rds", "ALLpivot_cir_funct_KDT_shapScore_drug_table.rds"))
+pivot_shapRel_drugbank_functions <- readRDS(file.path(rds_folder,"ALLpivot_cir_funct_KDT_shapScore_drug_table.rds"))
 pivot_shapRel_drugbank_functions_ATC_1_2_3_4 <- merge(pivot_shapRel_drugbank_functions, data_fisherTest_level1[which(data_fisherTest_level1$Relevant == T) , c("DRUG","ATC_LEVEL1")]) %>%  
   merge(., data_fisherTest_level2[which(data_fisherTest_level2$Relevant == T) , c("DRUG","ATC_LEVEL2")]) %>%
   merge(., data_fisherTest_level3[which(data_fisherTest_level3$Relevant == T) , c("DRUG","ATC_LEVEL3")]) %>%
@@ -332,12 +346,12 @@ ATCora4_byfunc[is.na(ATCora4_byfunc)] <- 0
 ATCora4_byfunc <- rbind( TOTAL = n_hallmark$total[match(colnames(ATCora4_byfunc),n_hallmark$hallmark)] ,ATCora4_byfunc) %>%
   .[, c("Fatty.acid.and.lipid.metabolism", "Apoptosis", "Neuronal", "DNA.integrity" ,"Inflammatory.response", "Stress.response","Necrosis", "Development","Sensory.and.stimuli.transduction")] ## reorder according to hallmark circle
 
-saveRDS(ATCora4_byfunc, file = here("rds", "ATCora4_byfunc.rds"))
+saveRDS(ATCora4_byfunc, file = file.path(rds_folder, "ATCora4_byfunc.rds"))
 
 ATCora4_byfunc_percent <- apply(ATCora4_byfunc, 2, function(x) round(x/max(x)*100)) %>% data.frame(.)
 colnames(ATCora4_byfunc_percent)<- gsub("\\.", " ", colnames(ATCora4_byfunc_percent))
 
-png(filename = here("results/figures/ATC_level4_ora_byhallmark_perecent.png"),height = 8000 ,width = 8000, res = 500)
+png(filename = file.path(figures_folder,"figures/ATC_level4_ora_byhallmark_perecent.png"),height = 8000 ,width = 8000, res = 500)
 # NMF::aheatmap(t(ATCora4_byfunc_percent[-1,]), color = "-heat",  border_color = "white", Rowv = F, Colv = F, fontsize = 15)
 pheatmap::pheatmap(ATCora4_byfunc_percent[-1,], angle_col = 45, color = rev(colorRampPalette(rev(brewer.pal(n = 7, name ="Purples")))(20)), fontsize = 15)
 dev.off()

@@ -26,9 +26,6 @@ library("ggpolypath")
 
 #### 0. Path setup ########
 
-#TODO: rename data_folder to ml_folder
-data_folder = here("results", "ml")
-
 tables_folder <- here("results", "tables")
 if(!dir.exists(tables_folder)){
   dir.create(tables_folder)
@@ -45,6 +42,8 @@ if(!dir.exists(rds_folder)){
 }
 
 #### 1. Load SHAP model results and filter ########
+
+data_folder = here("results", "ml")
 
 ## First of all Load pathways from hipathia R package
 pathways <- hipathia::load_pathways("hsa")
@@ -75,7 +74,7 @@ circuits_tr <- data.frame(code = rownames(shap_entrez), name =  rownames(shap)) 
                                                                                   ifelse(length(x) == 4, paste(paste(paste(x[[1]],x[[2]], sep = "-"), x[[3]], sep =  "-"), x[[4]], sep = " "),
                                                                                          ifelse(length(x) == 5, paste(paste(paste(paste(x[[1]],x[[2]], sep = "-"), x[[3]], sep =  "-"), x[[4]], sep = " "), x[[5]], sep = " "),
                                                                                                 ifelse(length(x) == 6, paste(paste(paste(paste(paste(x[[1]],x[[2]], sep = "-"), x[[3]], sep =  "-"), x[[4]], sep = " "), x[[5]], sep = " "), x[[6]], sep = " ")))))}))
-write.table(circuits_tr,here("results/tables/circuits_translate.tsv"), quote = F, sep = "\t", col.names = T, row.names = F)
+write.table(circuits_tr,file.path(tables_folder,"circuits_translate.tsv"), quote = F, sep = "\t", col.names = T, row.names = F)
 
 ## Load the stability results for all circuits from the RP Map ### 
 stability <- fread(file = file.path(data_folder, "stability_results.tsv")) %>% as.data.frame(.)
@@ -99,7 +98,7 @@ shap_stable[which(threshold_stable == 0, arr.ind = T)] <- 0 ## first we set to 0
 shap_relevant_stable <- shap_stable[,(apply(threshold_stable, 2, function(y) any(y == 1)))] ## Filter out the relevant KDTs
 dim(shap_relevant_stable)
 
-write.table(shap_relevant_stable, here("results/tables/shap_relevant_stable.tsv"), quote = F, sep = "\t", col.names = T, row.names = T)
+write.table(shap_relevant_stable,file.path(tables_folder,"shap_relevant_stable.tsv"), quote = F, sep = "\t", col.names = T, row.names = T)
 
 ## Subset  only the shap values which are relevant for at least 1 circuit in threshold matrix ###
 shap_entrez_stable[which(threshold_entrez_stable == 0, arr.ind = T)] <- 0 
@@ -121,16 +120,16 @@ all(targets_shap_rel_stable$Entrez_dbi == targets_shap_rel_stable$entrez) ## TRU
 any(is.na(targets_shap_rel_stable$Gene_name))
 
 ## Table of all relevant stable KDTs with their names ##
-write.table(shap_entrez_relevant_stable, here("results/tables/shap_entrez_relevant_stable.tsv"), quote = F, sep = "\t", col.names = T, row.names = T)
-write.xlsx(targets_shap_rel_stable[,c(1:3)], file = here("results", "tables", "relevant_targets_ml_stable.xlsx"))
+write.table(shap_entrez_relevant_stable, file.path(tables_folder,"shap_entrez_relevant_stable.tsv"), quote = F, sep = "\t", col.names = T, row.names = T)
+write.xlsx(targets_shap_rel_stable[,c(1:3)], file = file.path(tables_folder, "relevant_targets_ml_stable.xlsx"))
 
 #### 3. Filter DRUGBANK data for functional annotation of relevant targets #
 ## Load Drugbank database 
-data_folder2 <- here("data/interim")
+data_folder2 <- here("data", "interim")
 fname2 <- "drugbank-v050108_curated.tsv"
 fpath2 <-file.path(data_folder2,fname2)
 
-drugbank_alltar <- read.delim(file = fpath2, sep = "\t" )
+drugbank_alltar <- read.delim(file =fpath2, sep = "\t" )
 
 ##  Total KDT_drug_combinations
 distinct(drugbank_alltar[, c(1,15)]) %>% dim(.) ## 26979
@@ -144,14 +143,14 @@ dim(drugbank_app_action) ## 2690 combinations KDT-drug taken into account
 length(unique(drugbank_app_action$uniprot_id)) ## 718 Uniprot IDs filtered 
 
 ## Load genes stable translator used to Unipro IDs
-entrez_uniprot <- read.delim(file = paste0(data_folder2,"/genes_drugbank-v050108_mygene-20230120.tsv")) %>% .[.$uniprot_id %in% drugbank_app_action$uniprot_id , ]
+entrez_uniprot <- read.delim(file = file.path(data_folder2,"genes_drugbank-v050108_mygene-20230120.tsv")) %>% .[.$uniprot_id %in% drugbank_app_action$uniprot_id , ]
 dim(entrez_uniprot)
 
 drugbank_app_action <- merge(drugbank_app_action, entrez_uniprot,) %>% .[-which(is.na(.$entrez_id)),] 
 length(unique(drugbank_app_action$entrez_id)) 
 all(targets_shap_rel_stable$entrez %in% drugbank_app_action$entrez_id) ## check 
 
-saveRDS(drugbank_app_action, here("rds", "drugbank_app_action_entrez.rds"))
+saveRDS(drugbank_app_action, file.path(rds_folder, "drugbank_app_action_entrez.rds"))
 
 drugbank_app_action_genes <- merge(drugbank_app_action, genes_tr, by.x = "entrez_id", by.y = "entrez" ) ## Add the symbol column from the stable translate table
 drugbank_app_action_genes$actions[drugbank_app_action_genes$actions == ""] <- "unknown" ## unify the not known drug actions to the same term "unknown"
@@ -175,7 +174,7 @@ drugbank_app_action_genes$simplified_action <- ifelse(drugbank_app_action_genes$
 
 length(unique(drugbank_app_action_genes$entrez_id)) ## We have all included KDTs 711
 
-write.xlsx(drugbank_app_action_genes, file = here("results", "tables", "supp_tabl3_drugbank518_filtered.xlsx"))
+write.xlsx(drugbank_app_action_genes, file =  file.path(tables_folder, "supp_tabl3_drugbank518_filtered.xlsx"))
 
 alldrug_byaction <- drugbank_app_action_genes[,c("name", "actions", "entrez_id")]
 colnames(alldrug_byaction) <- c("drug", "drug_action", "KDT")  
@@ -210,7 +209,7 @@ df_venn[is.na(df_venn)] <- 0
 df_venn[df_venn>1] <- 1
 
 ## Do VennDiagram of the simplified drug effects with venn R pack - ALL DRUGS ASSESSED
-png(filename = here("results", "figures", "venn_drugeffectsALL.png"), width = 8000, height = 8000, bg = F)
+png(filename = file.path(figures_folder,"venn_drugeffectsALL.png"), width = 8000, height = 8000, bg = F)
 venn(df_venn, ilab=TRUE, zcolor = "style")
 dev.off()
 
@@ -225,7 +224,7 @@ drugbank_effects_tar$actions[drugbank_effects_tar$actions == "other"]  <- "unkno
 data.frame(table(drugbank_effects_tar$actions)) 
 any(is.na(drugbank_effects_tar$actions))
 
-saveRDS(drugbank_effects_tar, here("rds", "drugbank_effects_tar.rds"))
+saveRDS(drugbank_effects_tar, file.path(rds_folder, "drugbank_effects_tar.rds"))
 
 ## Create a data frame to do Venn diagram of the simplified drug effects - RELEVANT DRUGS FILTERED BY DREXM3L
 drugs_rel_DF <- drugbank_effects_tar[, c("name", "actions", "symbol")]
@@ -251,13 +250,13 @@ df_venn_relevant[is.na(df_venn_relevant)] <- 0
 df_venn_relevant[df_venn_relevant>1] <- 1
 
 ## Do VennDiagram of the simplified drug effects with venn R pack - ALL DRUGS ASSESSED
-png(filename = here("results", "figures", "venn_drugeffects_relevantDRUGS.png"), width = 8000, height = 8000, bg = F)
+png(filename = file.path(figures_folder,"venn_drugeffects_relevantDRUGS.png"), width = 8000, height = 8000, bg = F)
 venn(df_venn_relevant, ilab=TRUE, zcolor = "style")
 dev.off()
 
 
 ## Since a drug can have several effects depending on the KDT it targets, and KDTS can be targeted by many drugs, we will select the most common effect that drugs have on each KDT to then plot it .
-drug_bygenes <- data.frame(aggregate(cbind(as.character(drugbank_effects_tar$actions)) ~ drugbank_effects_tar$symbol, data = drugbank_effects_tar , FUN = paste))#, collapse ="," ))
+drug_bygenes <- data.frame(aggregate(cbind(as.character(drugbank_effects_tar$actions)) ~ drugbank_effects_tar$symbol, data = drugbank_effects_tar , FUN = paste))
 colnames(drug_bygenes) <- c("gene", "drug_action") 
 drug_bygenes$drug_action <- sapply(drug_bygenes$drug_action, function(x) names(which.max(table(x)))) 
 
@@ -286,6 +285,6 @@ table(drug_ef$Drug_effect)
 
 ## See which function is the most predominant for a certain gene KDT
 colnames(shap_relevant_stable)[!colnames(shap_relevant_stable) %in% drug_ef$symbol] ## Check that all KDTs have a drug effect
-write.table(drug_ef, here("results/tables/drugEffects_KDT_relevant_stable_simpl.tsv"), quote = F, sep = "\t", col.names = T, row.names = F)
+write.table(drug_ef, file.path(tables_folder, "drugEffects_KDT_relevant_stable_simpl.tsv"), quote = F, sep = "\t", col.names = T, row.names = F)
 
 

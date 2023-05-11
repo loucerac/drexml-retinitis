@@ -22,27 +22,31 @@ library("tibble")
 library("ggplot2")
 library("fmsb")
 
-if(!dir.exists(here("results/tables"))){
-  dir.create(here("results/tables"))
+tables_folder <- here("results", "tables")
+if(!dir.exists(tables_folder)){
+  dir.create(tables_folder)
 }
 
-if(!dir.exists(here("results/figures"))){
-  dir.create(here("results/figures"))
+figures_folder <- here("results", "figures")
+if(!dir.exists(figures_folder)){
+  dir.create(figures_folder)
 }
 
-if(!dir.exists(here("rds"))){
-  dir.create(here("rds"))
+rds_folder <- here("results", "rds")
+if(!dir.exists(rds_folder)){
+  dir.create(rds_folder)
 }
-
 
 ################################################################################################
 ##### PLOTS: SELECTION OF CIRCUIT FUNCTIONS FOR FUNCTIONAL MODULE ANALYSIS #######
 #############################################################################################
 
+data_folder = here("results", "ml")
+
 ### Load files###
-shap_relevant_stable_notscaled <- readRDS(file =  here("rds","shap_relevant_stable_notscaled_hallmarks.rds")) ## Load shap matrix
-shap_relevant_stable <- read.delim(here("results/tables/shap_relevant_stable.tsv")) ## Load the filtered matrix with stable circuits and relevant KDTs
-drugbank_effects_tar<- readRDS(here("rds", "drugbank_effects_tar.rds")) ## Load the drug_eff DF from Drugbank DB
+shap_relevant_stable_notscaled <- readRDS(file =  file.path(rds_folder,"shap_relevant_stable_notscaled_hallmarks.rds")) ## Load shap matrix
+shap_relevant_stable <- read.delim(file = file.path(tables_folder,"shap_relevant_stable.tsv")) ## Load the filtered matrix with stable circuits and relevant KDTs
+drugbank_effects_tar<- readRDS(file.path(rds_folder, "drugbank_effects_tar.rds")) ## Load the drug_eff DF from Drugbank DB
 
 vali <- c("ALOX5", "ELOVL4", "GABRA1", "GRIN1", "SLC12A5", "GLRA2") ## 6 validated KDTs
 
@@ -88,7 +92,7 @@ balloon <- table_pathways_pretty %>% ggplot(aes(x = Hallmark, y = Pathway )) +
         axis.text.y =  element_text(size = 18, family = "Helvetica"))+
   guides(fill = guide_legend(override.aes = list(size=10)))
 
-png(here("results", "figures","balloonplot_pathway_hallmarks_onecolor_grad.png"), height = 8000, width = 8000, res = 500)
+png(file.path(figures_folder,"balloonplot_pathway_hallmarks_onecolor_grad.png"), height = 8000, width = 8000, res = 500)
 balloon
 dev.off()
 
@@ -114,8 +118,8 @@ colnames(pivot_shapRel)<- gsub("variable", "KDT", colnames(pivot_shapRel)) %>%  
 pivot_shapRel_drugbank_functions <- pivot_shapRel %>% merge(.,table_pathways, by.x = "KEGG.Pathway", by.y = "Pathway") %>% merge(., drugbank_effects_tar[,c(10,1,2,3,4,9)], by.x = "KDT", by.y = "symbol")%>% add_column("Module"= table_hallmarks_circuit$Module[match(.$circuit, table_hallmarks_circuit$circuit)])
 colnames(pivot_shapRel_drugbank_functions) <- gsub("name", "DRUG", colnames(pivot_shapRel_drugbank_functions))
 
-write.table(pivot_shapRel_drugbank_functions, file = here("results", "tables", "ALLpivot_cir_funct_KDT_shapScore_drug_table.tsv"), sep = "\t", quote = F, col.names = T, row.names = F)
-saveRDS(pivot_shapRel_drugbank_functions, here("rds", "ALLpivot_cir_funct_KDT_shapScore_drug_table.rds"))
+write.table(pivot_shapRel_drugbank_functions, file =file.path(tables_folder, "ALLpivot_cir_funct_KDT_shapScore_drug_table.tsv"), sep = "\t", quote = F, col.names = T, row.names = F)
+saveRDS(pivot_shapRel_drugbank_functions, file.path(rds_folder, "ALLpivot_cir_funct_KDT_shapScore_drug_table.rds"))
 
 length(unique(pivot_shapRel_drugbank_functions$KDT))# 109
 
@@ -123,8 +127,8 @@ length(unique(pivot_shapRel_drugbank_functions$KDT))# 109
 pivot_shapRel_drugbank_functions_validated <- filter(pivot_shapRel_drugbank_functions, KDT %in% vali)
 length(unique(pivot_shapRel_drugbank_functions_validated$KDT)) ## check (6)
 
-write.table(pivot_shapRel_drugbank_functions_validated, file = here("results", "tables" ,"Validated_pivot_cir_funct_KDT_shapScore_drug_table.tsv"), sep = "\t", quote = F, col.names = T, row.names = F)
-saveRDS(pivot_shapRel_drugbank_functions_validated, here("rds", "Validated_pivot_cir_funct_KDT_shapScore_drug_table.rds"))
+write.table(pivot_shapRel_drugbank_functions_validated, file = file.path(tables_folder,"Validated_pivot_cir_funct_KDT_shapScore_drug_table.tsv"), sep = "\t", quote = F, col.names = T, row.names = F)
+saveRDS(pivot_shapRel_drugbank_functions_validated, file.path(rds_folder, "Validated_pivot_cir_funct_KDT_shapScore_drug_table.rds"))
 
 
 #### GET KDTS x Hallmarks (in % of presence) for RADAR, HEATMAP and SPIDER plot ####
@@ -139,7 +143,7 @@ relevant_KDTbyfunc[is.na(relevant_KDTbyfunc)] <- 0
 relevant_KDTbyfunc <- rbind( TOTAL = n_hallmark$total[match(colnames(relevant_KDTbyfunc),n_hallmark$hallmark)] ,relevant_KDTbyfunc) %>% 
   .[, c("Fatty.acid.and.lipid.metabolism", "Apoptosis", "Neuronal", "DNA.integrity" ,"Inflammatory.response", "Stress.response","Necrosis", "Development","Sensory.and.stimuli.transduction")] ## reorder according to hallmark circle
 
-saveRDS(relevant_KDTbyfunc, file = here("rds", "relevant_KDTbyfunc.rds"))
+saveRDS(relevant_KDTbyfunc, file = file.path(rds_folder, "relevant_KDTbyfunc.rds"))
 
 
 ## DRUGS ##
@@ -152,7 +156,7 @@ drug_byfunc[is.na(drug_byfunc)]<- 0
 drug_byfunc <- rbind( TOTAL = n_hallmark$total[match(colnames(drug_byfunc),n_hallmark$hallmark)] ,drug_byfunc) %>%
   .[, c("Fatty.acid.and.lipid.metabolism", "Apoptosis", "Neuronal", "DNA.integrity" ,"Inflammatory.response", "Stress.response","Necrosis", "Development","Sensory.and.stimuli.transduction")] ## reorder according to hallmark circle
 
-saveRDS(drug_byfunc, file = here("rds", "drug_byfunc.rds"))
+saveRDS(drug_byfunc, file = file.path(rds_folder, "drug_byfunc.rds"))
 
 
 ## Hallmarks vs Hallmarks through KDTs ##
@@ -166,7 +170,7 @@ ha_ha <- ha_ha[ which(apply(ha_ha[,c(1,2)], 1, function(x) ifelse(length(unique(
   .[, c("Fatty acid and lipid metabolism", "Apoptosis", "Neuronal", "DNA integrity" ,"Inflammatory response", "Stress response","Necrosis", "Development","Sensory and stimuli transduction")] ## reorder according to hallmark circle
 
 ha_ha[is.na(ha_ha)] <- 0
-saveRDS(ha_ha, file = here("rds", "hallmarks_byhallmarks.rds"))
+saveRDS(ha_ha, file = file.path(rds_folder, "hallmarks_byhallmarks.rds"))
 
 
 ### DO RADAR PLOT OF PERCENTAGE OF RP MAP COVERED BY EACH HALMARK ###
@@ -191,7 +195,7 @@ gra <- gra +
   #           size=20, angle=0, vjust=0.5, hjust=0.5, color = "gray10")+
   labs(x  =  NULL, y  =  NULL)
 
-png(here("results", "figures","radar_hallmarks_percentageRPmap.png"), height = 8000, width = 8000, res = 500)
+png(file.path(figures_folder,"radar_hallmarks_percentageRPmap.png"), height = 8000, width = 8000, res = 500)
 gra
 dev.off()
 

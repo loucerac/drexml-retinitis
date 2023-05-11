@@ -17,23 +17,25 @@ library("fmsb")
 library("tibble")
 
 
-if(!dir.exists(here("results/tables"))){
-  dir.create(here("results/tables"))
+if(!dir.exists(tables_folder)){
+  dir.create(tables_folder)
 }
 
-if(!dir.exists(here("results/figures"))){
-  dir.create(here("results/figures"))
+figures_folder <- here("results", "figures")
+if(!dir.exists(figures_folder)){
+  dir.create(figures_folder)
 }
 
-if(!dir.exists(here("rds"))){
-  dir.create(here("rds"))
+rds_folder <- here("results", "rds")
+if(!dir.exists(rds_folder)){
+  dir.create(rds_folder)
 }
 
 #### 1.Read the "rds" files for de KDT_by function and DRUG_byfunction ####
 
-relevant_KDTbyfunc <- readRDS(file = here("rds", "relevant_KDTbyfunc.rds"))
+relevant_KDTbyfunc <- readRDS(file = file.path( rds_folder, "relevant_KDTbyfunc.rds"))
 
-drug_byfunc<- readRDS(file = here("rds", "drug_byfunc.rds"))
+drug_byfunc<- readRDS(file = file.path( rds_folder, "drug_byfunc.rds"))
 
 ## Transform count of hallmarks in percentage of the hallmark represented in a KDT or drug.
 relevant_KDTbyfunc_percent <- apply(relevant_KDTbyfunc, 2, function(x) round(x/max(x)*100)) %>% data.frame(.)
@@ -65,8 +67,7 @@ colors_line <-  c(scales::alpha("gold", 0.9),
                   scales::alpha("purple", 0.9))
 
 
-png(here("results", "figures","spider_Omega3_Zopiclone_Taurine.png"), height = 6000, width = 9000, res = 500)
-# png(here("results", "figures","spider_barbiturics.png"), height = 6000, width = 9000, res = 500)
+png(file.path(figures_folder,"spider_Omega3_Zopiclone_Taurine.png"), height = 6000, width = 9000, res = 500)
 radarchart(drugs_compare, 
            seg = 9,  # Number of axis segments
            title = "Drugs targeting validated KDTs: ELOVL4, GABRA1, GLRA2",
