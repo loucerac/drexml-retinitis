@@ -62,7 +62,7 @@ List the ready features here:
 
 
 ## Screenshots
-![DRExM3L modelization overview](./V4_graphical_abstract_RP_2023_rounded-Page-3.drawio.png)
+![DRExM3L modelization overview](./img/V4_graphical_abstract_RP_2023_rounded-Page-3.drawio.png)
 
 
 ## Setup
