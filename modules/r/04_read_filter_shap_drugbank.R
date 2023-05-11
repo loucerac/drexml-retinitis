@@ -24,24 +24,30 @@ library("fmsb")
 library("venn")
 library("ggpolypath")
 
+#### 0. Path setup ########
 
-if(!dir.exists(here("results/tables"))){
-  dir.create(here("results/tables"))
+#TODO: rename data_folder to ml_folder
+data_folder = here("results", "ml")
+
+tables_folder <- here("results", "tables")
+if(!dir.exists(tables_folder)){
+  dir.create(tables_folder)
 }
 
-if(!dir.exists(here("results/figures"))){
-  dir.create(here("results/figures"))
+figures_folder <- here("results", "figures")
+if(!dir.exists(figures_folder)){
+  dir.create(figures_folder)
 }
 
-if(!dir.exists(here("rds"))){
-  dir.create(here("rds"))
+rds_folder <- here("results", "rds")
+if(!dir.exists(rds_folder)){
+  dir.create(rds_folder)
 }
 
 #### 1. Load SHAP model results and filter ########
 
-pathways <- hipathia::load_pathways("hsa")## First of all Load pathways from hipathia R package
-
-data_folder = here("results","ml")
+## First of all Load pathways from hipathia R package
+pathways <- hipathia::load_pathways("hsa")
 
 ## Load the relevance scores matrix with the threshold selection matrix for filtering ###
 shap <- fread(file = file.path(data_folder,"shap_summary_symbol.tsv"), header = T) %>% as.data.frame()
@@ -62,7 +68,7 @@ threshold_entrez <- threshold_entrez[ ,-1]
 
 ## Create tables of genes and circuits translations
 genes_tr <- data.frame(entrez = colnames(shap_entrez), symbol = colnames(shap))
-write.table(genes_tr,here("results/tables/KDT_genes_translate.tsv"), quote = F, sep = "\t", col.names = T, row.names = F)
+write.table(genes_tr, file.path(tables_folder, "KDT_genes_translate.tsv"), quote = F, sep = "\t", col.names = T, row.names = F)
 
 circuits_tr <- data.frame(code = rownames(shap_entrez), name =  rownames(shap)) %>% 
   add_column(circuit = strsplit(.$code, "\\.") %>% sapply(., function(x){ ifelse (length(x) == 3, paste(paste(x[[1]],x[[2]], sep = "-"), x[[3]], sep =  "-"),
