@@ -1,0 +1,4 @@
+{
+    "r.rpath.linux": "${workspaceFolder}/.venvs/r/bin/R",
+    "r.rterm.linux": "${workspaceFolder}/.venvs/r/bin/R",
+}
