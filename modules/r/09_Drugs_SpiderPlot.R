@@ -16,7 +16,7 @@ library("ggplot2")
 library("fmsb")
 library("tibble")
 
-
+tables_folder <- here("results", "tables")
 if(!dir.exists(tables_folder)){
   dir.create(tables_folder)
 }

@@ -13,6 +13,7 @@ library("tidyr")
 library("tibble")
 library("NMF")
 
+tables_folder <- here("results", "tables")
 if(!dir.exists(tables_folder)){
   dir.create(tables_folder)
 }

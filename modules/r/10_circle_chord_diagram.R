@@ -7,6 +7,7 @@
 
 library(circlize)
 
+tables_folder <- here("results", "tables")
 if(!dir.exists(tables_folder)){
   dir.create(tables_folder)
 }
@@ -25,10 +26,12 @@ if(!dir.exists(rds_folder)){
 
 ha_ha <- readRDS(file.path(rds_folder, "hallmarks_byhallmarks.rds"))
 
-grid.col <- c("#FFFF33", "#E41A1C", "#984EA3","#4DAF4A", "#FF7F00", "#999999", "#A65628", "#377EB8","#F781BF") ## Set the colors in proper order (like in the spiderplot) from palette Set1
+# Set the colors in proper order (like in the spiderplot) from palette Set1
+grid.col <- c("#FFFF33", "#E41A1C", "#984EA3","#4DAF4A", "#FF7F00", "#999999", "#A65628", "#377EB8","#F781BF") 
 grid.col <- setNames(grid.col, colnames(ha_ha))
 
-png(file.path(figures_folder,"hallmarks_KDTshared_chord_downwards.png"), height = 8000, width = 12000, res = 500) ## KDts shared among Hallmarks on a chord diagram ###
+# KDts shared among Hallmarks on a chord diagram
+png(file.path(figures_folder,"hallmarks_KDTshared_chord_downwards.png"), height = 8000, width = 12000, res = 500) 
 chordDiagram(as.matrix(ha_ha), transparency = 0.5,
              annotationTrack = "grid", 
              preAllocateTracks = 1, 
