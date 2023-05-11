@@ -187,6 +187,7 @@ nohup*
 results/
 logs/
 rds/
+Rplots.pdf
 
 # CONDA
 codaenv*
