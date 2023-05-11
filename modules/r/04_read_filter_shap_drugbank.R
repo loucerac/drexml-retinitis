@@ -68,7 +68,7 @@ threshold_entrez <- threshold_entrez[ ,-1]
 
 ## Create tables of genes and circuits translations
 genes_tr <- data.frame(entrez = colnames(shap_entrez), symbol = colnames(shap))
-write.table(genes_tr,here("results/tables/KDT_genes_translate.tsv"), quote = F, sep = "\t", col.names = T, row.names = F)
+write.table(genes_tr, file.path(tables_folder, "KDT_genes_translate.tsv"), quote = F, sep = "\t", col.names = T, row.names = F)
 
 circuits_tr <- data.frame(code = rownames(shap_entrez), name =  rownames(shap)) %>% 
   add_column(circuit = strsplit(.$code, "\\.") %>% sapply(., function(x){ ifelse (length(x) == 3, paste(paste(x[[1]],x[[2]], sep = "-"), x[[3]], sep =  "-"),
