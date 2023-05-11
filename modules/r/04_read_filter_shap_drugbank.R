@@ -24,6 +24,11 @@ library("fmsb")
 library("venn")
 library("ggpolypath")
 
+#### 0. Path setup ########
+
+#TODO: rename data_folder to ml_folder
+data_folder = here("results", "ml")
+
 tables_folder <- here("results", "tables")
 if(!dir.exists(tables_folder)){
   dir.create(tables_folder)
@@ -43,8 +48,6 @@ if(!dir.exists(rds_folder)){
 
 ## First of all Load pathways from hipathia R package
 pathways <- hipathia::load_pathways("hsa")
-
-data_folder = here("results","ml")
 
 ## Load the relevance scores matrix with the threshold selection matrix for filtering ###
 shap <- fread(file = file.path(data_folder,"shap_summary_symbol.tsv"), header = T) %>% as.data.frame()
