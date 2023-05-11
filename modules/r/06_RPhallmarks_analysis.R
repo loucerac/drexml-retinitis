@@ -50,7 +50,7 @@ drugbank_effects_tar<- readRDS(file.path(rds_folder, "drugbank_effects_tar.rds")
 
 vali <- c("ALOX5", "ELOVL4", "GABRA1", "GRIN1", "SLC12A5", "GLRA2") ## 6 validated KDTs
 
-hallmarks_circuits_anot <-  read.xlsx(xlsxFile =  "./data/final/RP_map_functions_MPC-annot.xlsx") %>% 
+hallmarks_circuits_anot <-  read.xlsx(xlsxFile =  here("data","final","RP_map_functions_MPC-annot.xlsx")) %>% 
   .[,-c(1,3,13,14,15)] %>%
   column_to_rownames(., "circuit_name") %>%
   apply(., 2, function(x) ifelse(is.na(x), F, T)) %>% 
