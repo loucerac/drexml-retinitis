@@ -14,6 +14,13 @@ library("tibble")
 library("ggplot2")
 library("dplyr")
 
+#### 0. Path setup ########
+
+tables_folder <- here("results", "tables")
+if(!dir.exists(tables_folder)){
+  dir.create(tables_folder)
+}
+
 #### 1. Get disease ORPHA-genes  ####
 
 localPDB(localPDB.path = paste(getwd(), "data", "interim","localPDB", sep = "/"), PDB = "all",
@@ -23,11 +30,6 @@ disease = "Retinitis pigmentosa"
 short_dis = "RP"
 genes_HPO_disease<- pheno_extract_HPO(disease, localPDB.path = paste(getwd(), "data", "interim","localPDB", sep = "/"))
 table_genes <- genes_HPO_disease[!duplicated(genes_HPO_disease[,"GeneName"]), ] %>% subset(., .$GeneName!="") %>% .[, -5]
-
-tables_folder <- here("results", "tables")
-if(!dir.exists(tables_folder)){
-  dir.create(tables_folder)
-}
 
 write.xlsx(table_genes, file = file.path(tables_folder, paste0("genes_", disease,".xlsx")), row.names = F )
 
@@ -82,7 +84,7 @@ paths_disease <- names(entrez.list)[paths_disease]
 
 dis_circuits <- subpathways.list[paths_disease]
 
-write.xlsx(paths_disease, file = file.path(tables_folder, paste0("pathways_", short_dis ,".xls")), row.names = F, col.names = T)
+write.xlsx(paths_disease, file = file.path(tables_folder,paste0("pathways_", short_dis ,".xls")), row.names = F, col.names = T)
 
 
 ## Get circuits with orpha_genes
@@ -261,7 +263,7 @@ for (i in 1: length(hpo_codes)){
   genes_sharingHPO$symbol_inHipathia[[i]] <- mapIds(org.Hs.eg.db, keys =    genes_sharingHPO$genes_inHipathia[[i]], column = "SYMBOL", keytype = "ENTREZID")
   genes_sharingHPO$not_in_ORPHA[i] <- sum(!genes_select[[i]][genes_select[[i]] %in% pathways$all.genes] %in% entrezIDgenes_ORPHA$entrezID) 
 }
-write.xlsx(genes_sharingHPO, file = file.path(tables_folder ,"table_hpos_genesHI_genesnotInORPHA.xlsx"))
+write.xlsx(genes_sharingHPO, file = file.path(tables_folder, "table_hpos_genesHI_genesnotInORPHA.xlsx"))
 
 stacked_hpos <- genes_sharingHPO[, c("shared_hpos", "count" ,"not_in_ORPHA")] %>% dplyr::rename( "Genes added to ORPHA/OMIM" = "not_in_ORPHA")%>% add_column("Total genes" = (genes_sharingHPO$count - genes_sharingHPO$not_in_ORPHA )) %>% mutate_all(as.character)%>%
   .[,c("shared_hpos","Total genes", "Genes added to ORPHA/OMIM")]  %>% pivot_longer(-shared_hpos)

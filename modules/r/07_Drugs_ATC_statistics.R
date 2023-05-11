@@ -322,7 +322,7 @@ pivot_shapRel_drugbank_functions_ATC_1_2_3_4 <- merge(pivot_shapRel_drugbank_fun
 
 
 ## READ MANUALLY CURATED HALLMARKS 
-hallmarks_circuits_anot <-  read.xlsx(xlsxFile =  "./data/final/RP_map_functions_MPC-annot.xlsx") %>% .[,-c(1,3,13,14,15)] %>% column_to_rownames(., "circuit_name")%>%
+hallmarks_circuits_anot <-  read.xlsx(xlsxFile =  here("data", "final", "RP_map_functions_MPC-annot.xlsx")) %>% .[,-c(1,3,13,14,15)] %>% column_to_rownames(., "circuit_name")%>%
   apply(., 2, function(x) ifelse(is.na(x), F, T)) %>% as.data.frame(.)
 
 ## Here I am recounting to see how many hallmarks we have summarized by PATHWAY
@@ -351,7 +351,7 @@ saveRDS(ATCora4_byfunc, file = file.path(rds_folder, "ATCora4_byfunc.rds"))
 ATCora4_byfunc_percent <- apply(ATCora4_byfunc, 2, function(x) round(x/max(x)*100)) %>% data.frame(.)
 colnames(ATCora4_byfunc_percent)<- gsub("\\.", " ", colnames(ATCora4_byfunc_percent))
 
-png(filename = file.path(figures_folder,"figures/ATC_level4_ora_byhallmark_perecent.png"),height = 8000 ,width = 8000, res = 500)
+png(filename = file.path(figures_folder, "ATC_level4_ora_byhallmark_perecent.png"),height = 8000 ,width = 8000, res = 500)
 # NMF::aheatmap(t(ATCora4_byfunc_percent[-1,]), color = "-heat",  border_color = "white", Rowv = F, Colv = F, fontsize = 15)
 pheatmap::pheatmap(ATCora4_byfunc_percent[-1,], angle_col = 45, color = rev(colorRampPalette(rev(brewer.pal(n = 7, name ="Purples")))(20)), fontsize = 15)
 dev.off()
