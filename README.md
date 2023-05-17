@@ -10,40 +10,41 @@
 * [Contact](#contact)
 
 ## Input Data
+
 - The Genotype-Tissue Expression (GTEx) RNA-Seq Data Gene read counts:
-  File name: GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct
-  File path: data/raw
-  Source download: https://gtexportal.org/home/datasets
+  - File name: GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct
+  - File path: data/raw
+  - Source download: https://gtexportal.org/home/datasets
 
 - The Anatomical Therapeutic Chemical (ATC) Classification table:
-  File name: ATC.csv
-  File path: data/raw
-  Source download: https://bioportal.bioontology.org/ontologies/ATC - 2022AB CSV file
+  - File name: ATC.csv
+  - File path: data/raw
+  - Source download: https://bioportal.bioontology.org/ontologies/ATC - 2022AB CSV file
 
 - The Human Phenotype Ontologies database (HPO):
-  File name: hp.obo-v1.2-20190906
-  File path: data/raw
-  Source download: https://hpo.jax.org/app/data/ontology - September 6th, 2019 release
+  - File name: hp.obo-v1.2-20190906
+  - File path: data/raw
+  - Source download: https://hpo.jax.org/app/data/ontology - September 6th, 2019 release
 
 - The Human Phenotype Ontologies (HPO) annotations linking diseases and phenotypes
-  File name: phenotype_annotation20190906.tab
-  File path: data/raw
-  Source download: https://hpo.jax.org/app/data/annotations - September 6th, 2019 release
+  - File name: phenotype_annotation20190906.tab
+  - File path: data/raw
+  - Source download: https://hpo.jax.org/app/data/annotations - September 6th, 2019 release
 
 - The Human Phenotype Ontologies (HPO) annotations linking genes and phenotypes
-  File name: phenotype_to_genes20191010.txt
-  File path: data/raw
-  Source download: https://hpo.jax.org/app/data/annotations - September 6th, 2019 release
+  - File name: phenotype_to_genes20191010.txt
+  - File path: data/raw
+  - Source download: https://hpo.jax.org/app/data/annotations - September 6th, 2019 release
 
 - HiPathia's list of physiological KEGG signaling pathways
-  File name: physiological_paths.tsv
-  File path: data/raw
-  Source: http://hipathia.babelomics.org/
+  - File name: physiological_paths.tsv
+  - File path: data/raw
+  - Source: http://hipathia.babelomics.org/
   
 - HiPathia's list of physiological KEGG signaling pathways with GO/Uniprot functional annotations 
-  File name: physPathsAnnot.tsv
-  File path: data/raw
-  Source: http://hipathia.babelomics.org/
+  - File name: physPathsAnnot.tsv
+  - File path: data/raw
+  - Source: http://hipathia.babelomics.org/
 
 ## Screenshots
 ![DRExM3L model overview](./img/V4_graphical_abstract_RP_2023_rounded-Page-3.drawio.png)
