@@ -191,6 +191,7 @@ results/
 logs/
 rds/
 Rplots.pdf
+drexml-retinitis.Rproj
 
 # CONDA
 codaenv*
