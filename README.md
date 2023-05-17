@@ -1,7 +1,7 @@
 # DRExM3L modelization of Retinitis Pigmentosa
 > In this work we propose a unique approach that, starting from the set of RP disease affected genes, provides a comprehensive landscape of the molecular mechanisms of the disease along with its druggable space. The method establishes a mechanistic disease map as an actionable environment, and employs an explainable machine learning model, “Drug REpurposing using Mechanistic Models of signal transduction and eXplainable Machine Learning” (DRExM³L), to assess the influence of druggable molecules, like drug target proteins, over the disease environment. Our approach merges information from transcriptomics, pathway graphs, biological/clinical, and drug-target interactions databases, to generate an in-depth view of the disease. The novelty of this workflow lies in the integration of multiple data sources, reinforcing interpretability with biological knowledge while reducing the dimensionality of the datasets.
 
-> Mechanistic demo [_here_](https://www.example.com).
+> RP Mechanistic Map [_here_](http://hipathia.babelomics.org/RP_Mechanistic_Map/).
 
 ## Table of Contents
 * [Input Data](#input-data)
