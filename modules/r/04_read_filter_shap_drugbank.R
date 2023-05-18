@@ -142,7 +142,7 @@ setDT(amendments)
 setDT(drugbank_curated)
 drugbank_curated[amendments, on = c("drugbank_id", "uniprot_id", "known_action", "organism"), actions := i.actions] 
 
-# write.table(drugbank_curated, here("data","interim","drugbank-v050108_curated.tsv"))
+write.table(drugbank_curated, here("data","interim","drugbank-v050108_curated.tsv"))
 
 ##  Total KDT_drug_combinations
 distinct(drugbank_alltar[, c(1,15)]) %>% dim(.) ## 26979
