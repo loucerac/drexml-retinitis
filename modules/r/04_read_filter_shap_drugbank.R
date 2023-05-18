@@ -124,12 +124,25 @@ write.table(shap_entrez_relevant_stable, file.path(tables_folder,"shap_entrez_re
 write.xlsx(targets_shap_rel_stable[,c(1:3)], file = file.path(tables_folder, "relevant_targets_ml_stable.xlsx"))
 
 #### 3. Filter DRUGBANK data for functional annotation of relevant targets #
+
 ## Load Drugbank database 
-data_folder2 <- here("data", "interim")
-fname2 <- "drugbank-v050108_curated.tsv"
+data_folder2 <- here("data/interim")
+fname2 <- "drugbank-v050108.tsv"
 fpath2 <-file.path(data_folder2,fname2)
 
-drugbank_alltar <- read.delim(file =fpath2, sep = "\t" )
+drugbank_alltar <- read.delim(file = fpath2, sep = "\t" )
+drugbank_curated <- drugbank_alltar
+drugbank_curated$is_protein_group_target <- ifelse(drugbank_curated$is_protein_group_target == "False", FALSE, "ERROR")
+
+## Load ammendments file with curated info to specify column "actions" for drug's pharmacological actions on targets
+amendments <- read.delim(here("data", "assets", "amendments_drugActions_drugbank-v050108.tsv"))
+
+## We will use data.table to update the values of column "actions" from the ammendments file info
+setDT(amendments)
+setDT(drugbank_curated)
+drugbank_curated[amendments, on = c("drugbank_id", "uniprot_id", "known_action", "organism"), actions := i.actions] 
+
+# write.table(drugbank_curated, here("data","interim","drugbank-v050108_curated.tsv"))
 
 ##  Total KDT_drug_combinations
 distinct(drugbank_alltar[, c(1,15)]) %>% dim(.) ## 26979
