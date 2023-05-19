@@ -34,7 +34,7 @@ if(!dir.exists(rds_folder)){
 
 #### 1. READ TABLE OF CATEGEORIES FROM ATC  #### Downloaded from https://bioportal.bioontology.org/ontologies/ATC 2022AB CSV file
 
-ATC_raw <- read.delim(here("data", "raw", "ATC.csv"), sep = ",") 
+ATC_raw <- read.delim(here("data", "raw", "ATC.csv.gz"), sep = ",") 
 ATC_raw$Class.ID <- str_split(ATC_raw$Class.ID, "ATC/") %>% sapply(., function(x) x[2]) 
 ATC_raw <- ATC_raw[which(!is.na(ATC_raw$ATC.LEVEL)), ] %>% .[order(.$Class.ID),]
 
