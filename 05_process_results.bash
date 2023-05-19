@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
 THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# Python-based
+PY_ENV="${THIS_FOLDER}/.venvs/drugbank-parser"
+PY_SRC_PATH="${THIS_FOLDER}/modules/drug-ora/drug-ora.py"
+conda run -p ${PY_ENV} python ${PY_SRC_PATH}
+
+# R-based
 R_ENV="${THIS_FOLDER}/.venvs/r"
 
 fnames=(
