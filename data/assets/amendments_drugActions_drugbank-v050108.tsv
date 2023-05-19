@@ -1,0 +1,23 @@
+drugbank_id	uniprot_id	actions	groups	known_action	organism
+DB00055	P00451	multitarget|inhibitor	approved|investigational|withdrawn	yes	Humans
+DB00055	P12259	multitarget|inhibitor	approved|investigational|withdrawn	yes	Humans
+DB00560	P0A7X3	adduct|binder	approved	yes	Escherichia coli (strain K12)
+DB00560	P0A7S3	adduct|binder	approved	yes	Escherichia coli (strain K12)
+DB00560	P0A7S9	adduct|binder	approved	yes	Escherichia coli (strain K12)
+DB00560	P0AG59	adduct|binder	approved	yes	Escherichia coli (strain K12)
+DB00560	P0A7U3	adduct|binder	approved	yes	Escherichia coli (strain K12)
+DB00570	Q71U36	adduct|binder	approved	yes	Humans
+DB00570	P07437	adduct|binder	approved	yes	Humans
+DB00570	Q9UJT1	adduct|binder	approved	yes	Humans
+DB00570	P23258	adduct|binder	approved	yes	Humans
+DB00570	Q9UJT0	adduct|binder	approved	yes	Humans
+DB00609	P9WGR1	adduct|inhibitor	approved	yes	Mycobacterium tuberculosis
+DB00980	P48039	multitarget|agonist	approved|investigational	yes	Humans
+DB00980	P49286	multitarget|agonist	approved|investigational	yes	Humans
+DB01254	P00519	multitarget|inhibitor	approved|investigational	yes	Humans
+DB01254	P12931	multitarget|inhibitor	approved|investigational	yes	Humans
+DB01254	P06239	multitarget|inhibitor	approved|investigational	yes	Humans
+DB01254	P42684	multitarget|inhibitor	approved|investigational	unknown	Humans
+DB01254	P06241	multitarget|inhibitor	approved|investigational	unknown	Humans
+DB14901	Q8NBP7	inhibitor	approved|investigational	yes	Humans
+DB15935	Q9UJM8	inhibitor	approved|investigational	yes	Humans
