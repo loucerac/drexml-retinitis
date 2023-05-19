@@ -22,6 +22,8 @@ data_folder = project_root.joinpath("data")
 assets_folder = data_folder.joinpath("assets")
 final_folder = data_folder.joinpath("final")
 results_folder = project_root.joinpath("results")
+tables_folder = results_folder.joinpath("tables")
+tables_folder.mkdir(parents=True, exist_ok=True)
 
 
 # %%
@@ -141,7 +143,7 @@ results = (
 )
 
 results.to_csv(
-    results_folder.joinpath("tables", "selected_drugs_atc_ora_new.tsv"),
+    tables_folder.joinpath("selected_drugs_atc_ora.tsv"),
     sep="\t",
     index=False,
 )
