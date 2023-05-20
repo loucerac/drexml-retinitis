@@ -52,3 +52,10 @@ wait
 end=`date +%s`
 runtime=$((end-start))
 echo "drexml duration: $runtime"
+
+start=`date +%s`
+bash 05_process_results.bash
+wait
+end=`date +%s`
+runtime=$((end-start))
+echo "analysis duration: $runtime"
