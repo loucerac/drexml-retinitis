@@ -8,7 +8,7 @@
 #SBATCH --output=./logs/drexml-rp_%j.out.log
 #SBATCH --error=./logs/drexml-rp_%j.err.log
 
-. ~/miniconda3/etc/profile.d/conda.sh;
+source $(conda info --base)/etc/profile.d/conda.sh
 
 start=`date +%s`
 bash install.sh
