@@ -21,6 +21,12 @@ if(!dir.exists(tables_folder)){
   dir.create(tables_folder)
 }
 
+figures_folder <- here("results", "figures")
+if(!dir.exists(figures_folder)){
+  dir.create(figures_folder)
+}
+
+
 #### 1. Get disease ORPHA-genes  ####
 
 localPDB(localPDB.path = paste(getwd(), "data", "interim","localPDB", sep = "/"), PDB = "all",
