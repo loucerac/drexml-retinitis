@@ -64,7 +64,7 @@ hpo_tab <- hpo_tab[-base::grep("*obsolete*", hpo_tab$term_id),]
 
 ## Filter only HPO associated with ORPHA diseases
 hpo_or<-hpo_tab[hpo_tab$origin == "orphadata",] 
-hpo_or_p <- hpo_or[hpo_or$aspect == "P",-c(1,2,6,11)] # erase duplicated info and empty columns
+hpo_or_p <- hpo_or[hpo_or$aspect == "P",] # erase duplicated info and empty columns
 table(hpo_or_p$aspect)
 
 
