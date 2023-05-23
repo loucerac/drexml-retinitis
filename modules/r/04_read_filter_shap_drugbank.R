@@ -135,7 +135,7 @@ drugbank_curated <- drugbank_alltar
 drugbank_curated$is_protein_group_target <- ifelse(drugbank_curated$is_protein_group_target == "False", FALSE, "ERROR")
 
 ## Load ammendments file with curated info to specify column "actions" for drug's pharmacological actions on targets
-amendments <- read.delim(here("data", "assets", "amendments_drugActions_drugbank-v050108.tsv"))
+amendments <- read.delim(here("data", "raw", "amendments_drugActions_drugbank-v050108.tsv"))
 
 ## We will use data.table to update the values of column "actions" from the ammendments file info
 setDT(amendments)

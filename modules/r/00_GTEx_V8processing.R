@@ -9,6 +9,7 @@ library(hipathia)
 library(feather)
 library(edgeR)
 library(data.table)
+library("R.utils")
 
 dir.create(here("data", "interim"), showWarnings = FALSE, recursive=TRUE)
 dir.create(here("data", "final"), showWarnings = FALSE, recursive=TRUE)
@@ -18,7 +19,7 @@ dir.create(here("data", "final"), showWarnings = FALSE, recursive=TRUE)
 
 ## Read the downloaded GTEx raw counts dataset
 expreset_raw <- fread(
-  file = here("data", "raw", "GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct"),
+  file = here("data", "raw", "GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct.gz"),
   header = T, sep = "\t"
 ) %>% as.data.frame(.)
 

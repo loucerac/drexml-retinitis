@@ -28,13 +28,34 @@ if(!dir.exists(figures_folder)){
 
 
 #### 1. Get disease ORPHA-genes  ####
+localPDB_path <- here("data", "interim", "localPDB")
 
-localPDB(localPDB.path = paste(getwd(), "data", "interim","localPDB", sep = "/"), PDB = "all",
-         omim.url = "ftp://ftp.ncbi.nih.gov/gene/DATA/gene2refseq.gz", download.method = "curl_fetch_disk")
+tryCatch(
+    {
+      localPDB(
+        localPDB.path = localPDB_path, PDB = "all",
+        omim.url = "ftp://ftp.ncbi.nih.gov/gene/DATA/gene2refseq.gz", 
+        download.method = "curl_fetch_disk"
+      )
+      print("Success downloading and creating localPDB.")
+    },
+    #if an error occurs, tell me the error
+    error=function(e) {
+        print(e)
+        print("Error while downloading localPDB, use copy from assets.")
+        dir.create(localPDB_path, showWarnings = FALSE, recursive=TRUE)
+        files_to_copy <- list.files(here("data", "raw", "localPDB"), full.names=TRUE)
+        file.copy(files_to_copy, localPDB_path, overwrite=TRUE)
+    },
+    warning=function(w) {
+        print(w)
+        return(NA)
+    }
+)
 
 disease = "Retinitis pigmentosa"
 short_dis = "RP"
-genes_HPO_disease<- pheno_extract_HPO(disease, localPDB.path = paste(getwd(), "data", "interim","localPDB", sep = "/"))
+genes_HPO_disease<- pheno_extract_HPO(disease, localPDB.path = localPDB_path)
 table_genes <- genes_HPO_disease[!duplicated(genes_HPO_disease[,"GeneName"]), ] %>% subset(., .$GeneName!="") %>% .[, -5]
 
 write.xlsx(table_genes, file = file.path(tables_folder, paste0("genes_", disease,".xlsx")), row.names = F )

@@ -15,9 +15,11 @@ THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 CONDA_ENV="${THIS_FOLDER}/.venvs/drugbank-parser"
 DATA_PATH="${THIS_FOLDER}/data"
 RAW_FOLDER="${DATA_PATH}/raw"
+mkdir -p $RAW_FOLDER
 INTERIM_FOLDER="${DATA_PATH}/interim"
+mkdir -p $INTERIM_FOLDER
 FINAL_FOLDER="${DATA_PATH}/final"
-ASSETS_FOLDER="${DATA_PATH}/assets"
+mkdir -p $FINAL_FOLDER
 
 # RAW
 XML_PATH="${RAW_FOLDER}/drugbank-${DRUGBANK_VERSION}.xml.gz"
@@ -48,8 +50,8 @@ else
         conda run -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py translate $TSV_PATH $DB_GENES_PATH --kind drugbank 
         conda run -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py translate $PARQUET_PATH $GTEX_GENES_PATH --kind gtex 
     else
-        cp "${ASSETS_FOLDER}/${DB_GENES_NAME}" $DB_GENES_PATH
-        cp "${ASSETS_FOLDER}/${GTEX_GENES_NAME}" $GTEX_GENES_PATH
+        cp "${RAW_FOLDER}/${DB_GENES_NAME}" $DB_GENES_PATH
+        cp "${RAW_FOLDER}/${GTEX_GENES_NAME}" $GTEX_GENES_PATH
 
         if test -f "$DB_GENES_PATH"; then
             echo "Found $DB_GENES_PATH in assets."

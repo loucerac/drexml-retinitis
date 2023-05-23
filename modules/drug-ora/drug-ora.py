@@ -19,7 +19,7 @@ np.random.seed(42)
 
 project_root = pathlib.Path(dotenv.find_dotenv()).absolute().parent
 data_folder = project_root.joinpath("data")
-assets_folder = data_folder.joinpath("assets")
+raw_folder = data_folder.joinpath("raw")
 final_folder = data_folder.joinpath("final")
 results_folder = project_root.joinpath("results")
 tables_folder = results_folder.joinpath("tables")
@@ -28,7 +28,7 @@ tables_folder.mkdir(parents=True, exist_ok=True)
 
 # %%
 atc_url = "https://raw.githubusercontent.com/fabkury/atcd/master/WHO%20ATC-DDD%202021-12-03.csv"
-atc_path = assets_folder.joinpath("WHO%20ATC-DDD%202021-12-03.csv")
+atc_path = raw_folder.joinpath("WHO ATC-DDD 2021-12-03.csv")
 if not atc_path.exists():
     with urllib.request.urlopen(atc_url) as response, open(atc_path, "wb") as out_file:
         shutil.copyfileobj(response, out_file)
