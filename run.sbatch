@@ -10,6 +10,8 @@
 
 THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+USE_GPU=$1
+
 if source $(conda info --base)/etc/profile.d/conda.sh; then
     echo "conda already available"
 elif . ~/miniconda3/etc/profile.d/conda.sh; then
@@ -25,7 +27,7 @@ fi
 echo "Using conda: $(which conda)"
 
 start=`date +%s`
-bash 00a_install.sh
+bash 00a_install.sh $USE_GPU
 wait
 end=`date +%s`
 runtime=$((end-start))
