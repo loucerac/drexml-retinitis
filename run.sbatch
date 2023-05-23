@@ -10,6 +10,7 @@
 
 source $(conda info --base)/etc/profile.d/conda.sh
 
+
 start=`date +%s`
 bash install.sh
 wait
@@ -17,8 +18,16 @@ end=`date +%s`
 runtime=$((end-start))
 echo "install duration: $runtime"
 
+
 start=`date +%s`
-bash 00_run_hipathia.bash
+bash 00a_download_raw.bash
+wait
+end=`date +%s`
+runtime=$((end-start))
+echo "download duration: $runtime"
+
+start=`date +%s`
+bash 00b_run_hipathia.bash
 echo "already run"
 wait
 end=`date +%s`
