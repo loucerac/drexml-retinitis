@@ -8,26 +8,38 @@
 #SBATCH --output=./logs/drexml-rp_%j.out.log
 #SBATCH --error=./logs/drexml-rp_%j.err.log
 
-source $(conda info --base)/etc/profile.d/conda.sh
+THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+if source $(conda info --base)/etc/profile.d/conda.sh; then
+    echo "conda already available"
+elif . ~/miniconda3/etc/profile.d/conda.sh; then
+    echo "conda already available, sourcing installed conda"
+else
+    echo "Installing miniconda into the project's workspace"
+    WORK_DIR=`mktemp -d`
+    (cd $WORK_DIR & curl -LO https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh)
+    (cd $WORK_DIR & bash Miniconda3-latest-Linux-x86_64.sh -b -u -p $THIS_FOLDER/.venvs/miniconda)
+    source $THIS_FOLDER/.venvs/miniconda/bin/activate
+fi
+
+echo "Using conda: $(which conda)"
 
 start=`date +%s`
-bash install.sh
+bash 00a_install.sh
 wait
 end=`date +%s`
 runtime=$((end-start))
 echo "install duration: $runtime"
 
-
 start=`date +%s`
-bash 00a_download_raw.bash
+bash 00b_download_raw.bash
 wait
 end=`date +%s`
 runtime=$((end-start))
 echo "download duration: $runtime"
 
 start=`date +%s`
-bash 00b_run_hipathia.bash
+bash 00c_run_hipathia.bash
 echo "already run"
 wait
 end=`date +%s`
