@@ -25,3 +25,4 @@ conda run -p $R_ENV_FOLDER R --vanilla -e "source('$THIS_FOLDER/renv/activate.R'
 mkdir -p "$THIS_FOLDER/data/raw"
 mkdir -p "$THIS_FOLDER/data/interim"
 mkdir -p "$THIS_FOLDER/data/final"
+touch -a .env
