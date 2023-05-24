@@ -70,7 +70,7 @@ runtime=$((end-start))
 echo "builder duration: $runtime"
 
 start=`date +%s`
-bash 04_run_drexml.bash
+bash 04_run_drexml.bash $USE_GPU
 wait
 end=`date +%s`
 runtime=$((end-start))
