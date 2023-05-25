@@ -85,6 +85,7 @@ dependencies:
   - packaging=23.1
   - pandas=1.5.3
   - parquet-cpp=1.5.1
+  - patsy=0.5.3
   - pip=23.0.1
   - platformdirs=3.1.1
   - pooch=1.7.0
@@ -108,6 +109,7 @@ dependencies:
   - setuptools=67.1.0
   - six=1.16.0
   - snappy=1.1.9
+  - statsmodels=0.14.0
   - tk=8.6.12
   - typing-extensions=4.4.0
   - typing_extensions=4.4.0
