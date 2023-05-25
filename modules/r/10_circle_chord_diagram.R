@@ -56,7 +56,3 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 
 }, bg.border = NA)
 dev.off()
-
-
-
-

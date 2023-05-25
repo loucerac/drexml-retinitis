@@ -322,7 +322,8 @@ pivot_shapRel_drugbank_functions_ATC_1_2_3_4 <- merge(pivot_shapRel_drugbank_fun
 
 
 ## READ MANUALLY CURATED HALLMARKS 
-hallmarks_circuits_anot <-  read.xlsx(xlsxFile =  here("data", "final", "RP_map_functions_MPC-annot.xlsx")) %>% .[,-c(1,3,13,14,15)] %>% column_to_rownames(., "circuit_name")%>%
+hallmarks_circuits_anot <-  read.xlsx(xlsxFile =  here("data", "raw", "RP_map_functions_MPC-annot.xlsx")) %>%
+ .[,-c(1,3,13,14,15)] %>% column_to_rownames(., "circuit_name") %>%
   apply(., 2, function(x) ifelse(is.na(x), F, T)) %>% as.data.frame(.)
 
 ## Here I am recounting to see how many hallmarks we have summarized by PATHWAY
