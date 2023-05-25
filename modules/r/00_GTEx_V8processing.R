@@ -19,7 +19,7 @@ dir.create(here("data", "final"), showWarnings = FALSE, recursive=TRUE)
 
 ## Read the downloaded GTEx raw counts dataset
 expreset_raw <- fread(
-  file = here("data", "raw", "GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct.gz"),
+  file = here("data", "raw", "GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct"),
   header = T, sep = "\t"
 ) %>% as.data.frame(.)
 
