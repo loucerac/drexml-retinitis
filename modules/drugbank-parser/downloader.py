@@ -7,7 +7,7 @@ import tarfile
 DATA_REPOSITORY = Path(find_dotenv()).parent.joinpath("data", "raw")
 DATA_REPOSITORY.mkdir(exist_ok=True, parents=True)
 
-files = [
+rp_files = [
     "amendments_drugActions_drugbank-v050108.tsv",
     "ATC.csv.gz",
     "drugbank-v050108.xml.gz",
@@ -24,13 +24,26 @@ files = [
     "RP_map_functions_MPC-annot.xlsx"
 ]
 
-zenodo = Zenodo()
+drexml_files = [
+    "expreset_Hinorm_gtexV8.rds.feather",
+    "expreset_pathvals_gtexV8.rds.feather"    
+]
 
-paths = [zenodo.download_latest("7957439", this_file) for this_file in files]
+def download_files(record, files):
+    record = str(record)
 
-for path in paths: 
-    if "localPDB" in path.name:
-        this_file = tarfile.open(path.as_posix())
-        this_file.extractall(DATA_REPOSITORY)
-    else:
-        shutil.copyfile(path.as_posix(), DATA_REPOSITORY.joinpath(path.name))
+    zenodo = Zenodo()
+
+    paths = [zenodo.download_latest(record, this_file) for this_file in files]
+
+    for path in paths: 
+        if "localPDB" in path.name:
+            this_file = tarfile.open(path.as_posix())
+            this_file.extractall(DATA_REPOSITORY)
+        else:
+            shutil.copyfile(path.as_posix(), DATA_REPOSITORY.joinpath(path.name))
+
+
+if __name__ == "__main__":
+    download_files(7957439, rp_files)
+    download_files(7737166, drexml_files)
