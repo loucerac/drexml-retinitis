@@ -359,14 +359,6 @@
         "stringr"
       ]
     },
-    "NbClust": {
-      "Package": "NbClust",
-      "Version": "3.0.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "e56c312f8636aace4c6ed1082df79ab9",
-      "Requirements": []
-    },
     "R.methodsS3": {
       "Package": "R.methodsS3",
       "Version": "1.8.2",
@@ -1689,10 +1681,10 @@
     },
     "mgcv": {
       "Package": "mgcv",
-      "Version": "1.8-42",
+      "Version": "1.8-41",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "3460beba7ccc8946249ba35327ba902a",
+      "Hash": "6b3904f13346742caa3e82dd0303d4ad",
       "Requirements": [
         "Matrix",
         "nlme"
@@ -1786,10 +1778,10 @@
     },
     "nnet": {
       "Package": "nnet",
-      "Version": "7.3-19",
+      "Version": "7.3-18",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "2c797b46eea7fb58ede195bc0b1f1138",
+      "Hash": "170da2130d5332bea7d6ede01875ba1d",
       "Requirements": []
     },
     "numDeriv": {
@@ -1852,18 +1844,6 @@
         "dplyr",
         "lme4",
         "numDeriv"
-      ]
-    },
-    "pheatmap": {
-      "Package": "pheatmap",
-      "Version": "1.0.12",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "db1fb0021811b6693741325bbe916e58",
-      "Requirements": [
-        "RColorBrewer",
-        "gtable",
-        "scales"
       ]
     },
     "pillar": {
