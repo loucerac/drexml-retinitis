@@ -4,8 +4,11 @@ from dotenv import find_dotenv
 from pathlib import Path
 import tarfile
 
-DATA_REPOSITORY = Path(find_dotenv()).parent.joinpath("data", "raw")
-DATA_REPOSITORY.mkdir(exist_ok=True, parents=True)
+DATA_REPOSITORY = Path(find_dotenv()).parent.joinpath("data")
+RAW_FOLDER = DATA_REPOSITORY.joinpath("raw")
+RAW_FOLDER.mkdir(exist_ok=True, parents=True)
+FINAL_FOLDER = DATA_REPOSITORY.joinpath("final")
+FINAL_FOLDER.mkdir(exist_ok=True, parents=True)
 
 rp_files = [
     "amendments_drugActions_drugbank-v050108.tsv",
@@ -29,7 +32,7 @@ drexml_files = [
     "expreset_pathvals_gtexV8.rds.feather"    
 ]
 
-def download_files(record, files):
+def download_files(record, files, folder):
     record = str(record)
 
     zenodo = Zenodo()
@@ -39,11 +42,11 @@ def download_files(record, files):
     for path in paths: 
         if "localPDB" in path.name:
             this_file = tarfile.open(path.as_posix())
-            this_file.extractall(DATA_REPOSITORY)
+            this_file.extractall(folder)
         else:
-            shutil.copyfile(path.as_posix(), DATA_REPOSITORY.joinpath(path.name))
+            shutil.copyfile(path.as_posix(), folder.joinpath(path.name))
 
 
 if __name__ == "__main__":
-    download_files(7957439, rp_files)
-    download_files(7737166, drexml_files)
+    download_files(7957439, rp_files, RAW_FOLDER)
+    download_files(7737166, drexml_files, FINAL_FOLDER)
