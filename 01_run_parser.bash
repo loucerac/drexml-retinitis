@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 UPDATE_GENE_INFO=false
 if [ "$UPDATE_GENE_INFO" = true ] ; then
     MYGENE_VERSION=$( date +%Y%m%d )

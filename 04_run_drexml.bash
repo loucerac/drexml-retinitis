@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 USE_GPU=$1
 
 if [[ -z "$USE_GPU" ]]; then
