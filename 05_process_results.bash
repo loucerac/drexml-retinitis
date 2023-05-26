@@ -5,7 +5,7 @@ THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # Python-based
 PY_ENV="${THIS_FOLDER}/.venvs/drugbank-parser"
 PY_SRC_PATH="${THIS_FOLDER}/modules/drug-ora/drug-ora.py"
-conda run -p ${PY_ENV} python ${PY_SRC_PATH}
+conda run --no-capture-output --live-stream -p ${PY_ENV} python ${PY_SRC_PATH}
 
 # R-based
 R_ENV="${THIS_FOLDER}/.venvs/r"
@@ -23,6 +23,6 @@ fnames=(
 for R_FNAME in ${fnames[@]}; do
     R_SRC_PATH="${THIS_FOLDER}/modules/r/${R_FNAME}"
     echo "Running ${R_FNAME}"
-    conda run -p ${R_ENV} Rscript ${R_SRC_PATH}
+    conda run --no-capture-output --live-stream -p ${R_ENV} Rscript ${R_SRC_PATH}
     wait
 done

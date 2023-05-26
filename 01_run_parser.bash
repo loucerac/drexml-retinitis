@@ -47,8 +47,8 @@ else
     echo "$DB_GENES_PATH does no exist."
     if [ "$UPDATE_GENE_INFO" = true ] ; then
         echo "Updating Mygene"
-        conda run -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py translate $TSV_PATH $DB_GENES_PATH --kind drugbank 
-        conda run -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py translate $PARQUET_PATH $GTEX_GENES_PATH --kind gtex 
+        conda run --no-capture-output --live-stream -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py translate $TSV_PATH $DB_GENES_PATH --kind drugbank 
+        conda run --no-capture-output --live-stream -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py translate $PARQUET_PATH $GTEX_GENES_PATH --kind gtex 
     else
         cp "${RAW_FOLDER}/${DB_GENES_NAME}" $DB_GENES_PATH
         cp "${RAW_FOLDER}/${GTEX_GENES_NAME}" $GTEX_GENES_PATH
@@ -62,7 +62,7 @@ else
     fi
 fi
 
-conda run -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py filter \
+conda run --no-capture-output --live-stream -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py filter \
     --drugbank-path ${TSV_PATH} \
     --drugbank-genes-path ${DB_GENES_PATH} \
     --gtex-genes-path ${GTEX_GENES_PATH} \
