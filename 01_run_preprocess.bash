@@ -42,7 +42,8 @@ GTEX_GENES_PATH="${INTERIM_FOLDER}/${GTEX_GENES_NAME}"
 
 # FINAL
 DB_FILTERED_PATH="${FINAL_FOLDER}/drugbank-${DRUGBANK_VERSION}_gtex-${GTEX_VERSION}_mygene-${MYGENE_VERSION}.tsv"
-GENES_FILTERED_PATH="${FINAL_FOLDER}/genes-drugbank-${DRUGBANK_VERSION}_gtex-${GTEX_VERSION}_mygene-${MYGENE_VERSION}.tsv"
+GENES_FILTERED_NAME="genes-drugbank-${DRUGBANK_VERSION}_gtex-${GTEX_VERSION}_mygene-${MYGENE_VERSION}.tsv"
+GENES_FILTERED_PATH="${FINAL_FOLDER}/${GENES_FILTERED_NAME}"
 
 PARSER_FOLDER="${THIS_FOLDER}/scripts/py"
 
@@ -88,7 +89,7 @@ if [ "$UPDATE" = true ] ; then
     echo "pathvals=expreset_pathvals_gtex${GTEX_VERSION}.rds.feather" >> $THIS_FOLDER/exp_design.env 
     echo "circuits=circuits_RP.rds.feather" >> $THIS_FOLDER/exp_design.env
     echo "circuits_column=in_disease" >> $THIS_FOLDER/exp_design.env
-    echo "genes=$GENES_FILTERED_PATH" >> $THIS_FOLDER/exp_design.env
+    echo "genes=$GENES_FILTERED_NAME" >> $THIS_FOLDER/exp_design.env
     echo "genes_column=drugbank_approved_targets" >> $THIS_FOLDER/exp_design.env
 else
     cp -f $THIS_FOLDER/exp_design_default.env $THIS_FOLDER/exp_design.env
