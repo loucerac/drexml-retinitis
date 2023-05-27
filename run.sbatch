@@ -10,14 +10,14 @@
 
 THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-if test -f "$THIS_FOLDER/.env"; then
+if ! test -f "$THIS_FOLDER/.env"; then
     echo "Copying default dotenv file from project."
     cp $THIS_FOLDER/example.env $THIS_FOLDER/.env
 fi
 
 set -a; source $THIS_FOLDER/.env; set +a
 
-if ! command -v conda >/dev/null 2>&1; then
+if command -v conda >/dev/null 2>&1; then
     source $(conda info --base)/etc/profile.d/conda.sh
     echo "conda already available"
 elif test -f ~/miniconda3/etc/profile.d/conda.sh; then
