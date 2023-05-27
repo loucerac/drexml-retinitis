@@ -41,7 +41,7 @@ GENES_FILTERED_PATH="${FINAL_FOLDER}/genes-drugbank-${DRUGBANK_VERSION}_gtex-${G
 PARSER_FOLDER="${THIS_FOLDER}/modules/drugbank-parser"
 
 # Parsing
-conda run -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py parse $XML_PATH $TSV_PATH
+conda run --no-capture-output --live-stream -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py parse $XML_PATH $TSV_PATH
 
 if test -f "$DB_GENES_PATH"; then
     echo "$DB_GENES_PATH exists."
