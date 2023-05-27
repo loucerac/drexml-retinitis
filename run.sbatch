@@ -34,7 +34,7 @@ runtime=$((end-start))
 echo "install duration: $runtime"
 
 start=`date +%s`
-bash 00b_download_raw.bash
+bash 00b_download_data.bash
 wait
 end=`date +%s`
 runtime=$((end-start))
