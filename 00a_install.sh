@@ -11,11 +11,18 @@ conda env remove -p ${PY_ENV_FOLDER}
 conda env create -p ${PY_ENV_FOLDER} -f "$THIS_FOLDER/environment_py.yml"
 
 DREXML_ENV_FOLDER="$THIS_FOLDER/.venvs/drexml"
-if [[ "$USE_GPU" -gt 0 ]]; then
+if [[ -z "$USE_GPU" ]]; then
+    n_gpus=0
+else
+    n_gpus=$USE_GPU
+fi
+
+if [[ "$n_gpus" -gt 0 ]]; then
     env_file="environment_drexml_gpu.yml"
 else
     env_file="environment_drexml.yml"
 fi
+
 echo "using ${env_file}"
 
 conda env remove -p ${DREXML_ENV_FOLDER}
