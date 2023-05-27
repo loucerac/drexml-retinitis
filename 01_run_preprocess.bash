@@ -2,19 +2,17 @@
 
 set -e
 
-UPDATE_GENE_INFO=false
-if [ "$UPDATE_GENE_INFO" = true ] ; then
+set -a; source .env; set +a
+
+if [ "$UPDATE" = true ] ; then
     MYGENE_VERSION=$( date +%Y%m%d )
     echo "Update Mygene version to ${MYGENE_VERSION}"
 else
     MYGENE_VERSION="20230120"
     echo "Using Mygene version ${MYGENE_VERSION}"
 fi
-GTEX_VERSION="V8"
-DRUGBANK_VERSION="v050108"
 
 THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-CONDA_ENV="${THIS_FOLDER}/.venvs/drugbank-parser"
 DATA_PATH="${THIS_FOLDER}/data"
 RAW_FOLDER="${DATA_PATH}/raw"
 mkdir -p $RAW_FOLDER
@@ -22,6 +20,14 @@ INTERIM_FOLDER="${DATA_PATH}/interim"
 mkdir -p $INTERIM_FOLDER
 FINAL_FOLDER="${DATA_PATH}/final"
 mkdir -p $FINAL_FOLDER
+
+# R
+R_ENV="${THIS_FOLDER}/.venvs/r"
+R_FNAME="00_GTEx_processing.R"
+R_SRC_PATH="${THIS_FOLDER}/modules/r/${R_FNAME}"
+
+# Python
+PY_ENV="${THIS_FOLDER}/.venvs/drugbank-parser"
 
 # RAW
 XML_PATH="${RAW_FOLDER}/drugbank-${DRUGBANK_VERSION}.xml.gz"
@@ -41,16 +47,17 @@ GENES_FILTERED_PATH="${FINAL_FOLDER}/genes-drugbank-${DRUGBANK_VERSION}_gtex-${G
 PARSER_FOLDER="${THIS_FOLDER}/modules/drugbank-parser"
 
 # Parsing
-conda run --no-capture-output --live-stream -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py parse $XML_PATH $TSV_PATH
+conda run --no-capture-output --live-stream -p ${PY_ENV} python ${PARSER_FOLDER}/parser.py parse $XML_PATH $TSV_PATH
 
 if test -f "$DB_GENES_PATH"; then
     echo "$DB_GENES_PATH exists."
 else
     echo "$DB_GENES_PATH does no exist."
-    if [ "$UPDATE_GENE_INFO" = true ] ; then
-        echo "Updating Mygene"
-        conda run --no-capture-output --live-stream -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py translate $TSV_PATH $DB_GENES_PATH --kind drugbank 
-        conda run --no-capture-output --live-stream -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py translate $PARQUET_PATH $GTEX_GENES_PATH --kind gtex 
+    if [ "$UPDATE" = true ] ; then
+        echo "Updating"
+        conda run --no-capture-output --live-stream -p ${R_ENV} Rscript ${R_SRC_PATH}
+        conda run --no-capture-output --live-stream -p ${PY_ENV} python ${PARSER_FOLDER}/parser.py translate $TSV_PATH $DB_GENES_PATH --kind drugbank 
+        conda run --no-capture-output --live-stream -p ${PY_ENV} python ${PARSER_FOLDER}/parser.py translate $PARQUET_PATH $GTEX_GENES_PATH --kind gtex 
     else
         cp "${RAW_FOLDER}/${DB_GENES_NAME}" $DB_GENES_PATH
         cp "${RAW_FOLDER}/${GTEX_GENES_NAME}" $GTEX_GENES_PATH
@@ -64,7 +71,7 @@ else
     fi
 fi
 
-conda run --no-capture-output --live-stream -p ${CONDA_ENV} python ${PARSER_FOLDER}/parser.py filter \
+conda run --no-capture-output --live-stream -p ${PY_ENV} python ${PARSER_FOLDER}/parser.py filter \
     --drugbank-path ${TSV_PATH} \
     --drugbank-genes-path ${DB_GENES_PATH} \
     --gtex-genes-path ${GTEX_GENES_PATH} \

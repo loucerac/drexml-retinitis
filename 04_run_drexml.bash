@@ -2,12 +2,12 @@
 
 set -e
 
-USE_GPU=$1
+set -a; source .env; set +a
 
 if [[ -z "$USE_GPU" ]]; then
     n_gpus=0
-elif [[ "$USE_GPU" -gt 0 ]]; then
-    n_gpus=-1
+else
+    n_gpus=$USE_GPU
 fi
 
 THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )

@@ -2,6 +2,8 @@
 
 set -e
 
+set -a; source .env; set +a
+
 THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # Python-based
