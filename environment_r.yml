@@ -258,6 +258,7 @@ dependencies:
   - r-openxlsx=4.2.5.2
   - r-parallelly=1.35.0
   - r-pbkrtest=0.5.2
+  - r-pheatmap=1.0.12
   - r-pillar=1.9.0
   - r-pkgconfig=2.0.3
   - r-pkgmaker=0.32.10
