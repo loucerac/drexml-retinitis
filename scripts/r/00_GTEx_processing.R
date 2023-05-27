@@ -2,6 +2,7 @@
 args = commandArgs(trailingOnly=TRUE)
 if (length(args) == 0) {
   gtex_fname <- "GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct.gz"
+  vers <- "V8"
 } else if (length(args) == 1) {
   gtex_fname <- args[1]
   vers <- "V8"
