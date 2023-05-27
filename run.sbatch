@@ -8,14 +8,13 @@
 #SBATCH --output=./logs/drexml-rp_%j.out.log
 #SBATCH --error=./logs/drexml-rp_%j.err.log
 
-THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-if ! test -f "$THIS_FOLDER/.env"; then
+if ! test -f .env; then
     echo "Copying default dotenv file from project."
-    cp $THIS_FOLDER/example.env $THIS_FOLDER/.env
+    cp ./example.env .env
 fi
 
-set -a; source $THIS_FOLDER/.env; set +a
+set -a; source .env; set +a
 
 if command -v conda >/dev/null 2>&1; then
     source $(conda info --base)/etc/profile.d/conda.sh
@@ -27,8 +26,8 @@ else
     echo "Installing miniconda into the project's workspace"
     WORK_DIR=`mktemp -d`
     (cd $WORK_DIR & curl -LO https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh)
-    (cd $WORK_DIR & bash Miniconda3-latest-Linux-x86_64.sh -b -u -p $THIS_FOLDER/.venvs/miniconda)
-    source $THIS_FOLDER/.venvs/miniconda/bin/activate
+    (cd $WORK_DIR & bash Miniconda3-latest-Linux-x86_64.sh -b -u -p ./.venvs/miniconda)
+    source ./.venvs/miniconda/bin/activate
 fi
 
 echo "Using conda: $(which conda)"
