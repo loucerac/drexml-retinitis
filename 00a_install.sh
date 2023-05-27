@@ -30,4 +30,7 @@ conda env create -p ${R_ENV_FOLDER} -f "$THIS_FOLDER/environment_r.yml"
 mkdir -p "$THIS_FOLDER/data/raw"
 mkdir -p "$THIS_FOLDER/data/interim"
 mkdir -p "$THIS_FOLDER/data/final"
+mkdir -p "$THIS_FOLDER/results/tables"
+mkdir -p "$THIS_FOLDER/results/ml"
+mkdir -p "$THIS_FOLDER/results/rds"
 touch -a .env
