@@ -80,11 +80,16 @@ conda run --no-capture-output --live-stream -p ${PY_ENV} python ${PARSER_FOLDER}
 
 
 # recreate design environment after update
-echo "###### EXPERIMENT DESIGN  ######" >> $THIS_FOLDER/exp_design.env
-echo "data_path=${THIS_FOLDER}/data/final/" >> $THIS_FOLDER/exp_design.env
-echo "gene_exp=expreset_Hinorm_gtex${GTEX_VERSION}.rds.feather" >> $THIS_FOLDER/exp_design.env
-echo "pathvals=expreset_pathvals_gtex${GTEX_VERSION}.rds.feather" >> $THIS_FOLDER/exp_design.env 
-echo "circuits=circuits_RP.rds.feather" >> $THIS_FOLDER/exp_design.env
-echo "circuits_column=in_disease" >> $THIS_FOLDER/exp_design.env
-echo "genes=$GENES_FILTERED_PATH" >> $THIS_FOLDER/exp_design.env
-echo "genes_column=drugbank_approved_targets" >> $THIS_FOLDER/exp_design.env
+if [ "$UPDATE" = true ] ; then
+    rm -f $THIS_FOLDER/exp_design.env
+    echo "###### EXPERIMENT DESIGN  ######" >> $THIS_FOLDER/exp_design.env
+    echo "data_path=${THIS_FOLDER}/data/final/" >> $THIS_FOLDER/exp_design.env
+    echo "gene_exp=expreset_Hinorm_gtex${GTEX_VERSION}.rds.feather" >> $THIS_FOLDER/exp_design.env
+    echo "pathvals=expreset_pathvals_gtex${GTEX_VERSION}.rds.feather" >> $THIS_FOLDER/exp_design.env 
+    echo "circuits=circuits_RP.rds.feather" >> $THIS_FOLDER/exp_design.env
+    echo "circuits_column=in_disease" >> $THIS_FOLDER/exp_design.env
+    echo "genes=$GENES_FILTERED_PATH" >> $THIS_FOLDER/exp_design.env
+    echo "genes_column=drugbank_approved_targets" >> $THIS_FOLDER/exp_design.env
+else
+    cp -f $THIS_FOLDER/exp_design_default.env $THIS_FOLDER/exp_design.env
+fi
