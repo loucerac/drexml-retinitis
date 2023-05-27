@@ -47,7 +47,7 @@ tryCatch(
   # if an error occurs, tell me the error
   error = function(e) {
     print(e)
-    print("Error while downloading localPDB, use copy from assets.")
+    print("Error while downloading localPDB, using copy from assets.")
     dir.create(localPDB_path, showWarnings = FALSE, recursive = TRUE)
     files_to_copy <- list.files(here("data", "raw", "localPDB"), full.names = TRUE)
     file.copy(files_to_copy, localPDB_path, overwrite = TRUE)

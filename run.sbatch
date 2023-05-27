@@ -10,7 +10,12 @@
 
 THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-USE_GPU=$1
+if test -f "$THIS_FOLDER/.env"; then
+    echo "Copying default dotenv file from project."
+    cp $THIS_FOLDER/example.env $THIS_FOLDER/.env
+fi
+
+set -a; source .env; set +a
 
 if source $(conda info --base)/etc/profile.d/conda.sh; then
     echo "conda already available"
@@ -41,19 +46,11 @@ runtime=$((end-start))
 echo "download duration: $runtime"
 
 start=`date +%s`
-bash 00c_run_hipathia.bash
-echo "already run"
+bash 01_run_preprocess.bash
 wait
 end=`date +%s`
 runtime=$((end-start))
-echo "hipathia duration: $runtime"
-
-start=`date +%s`
-bash 01_run_parser.bash
-wait
-end=`date +%s`
-runtime=$((end-start))
-echo "parser duration: $runtime"
+echo "preprocess duration: $runtime"
 
 start=`date +%s`
 bash 02_run_annotator.bash

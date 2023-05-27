@@ -24,10 +24,10 @@ mkdir -p $FINAL_FOLDER
 # R
 R_ENV="${THIS_FOLDER}/.venvs/r"
 R_FNAME="00_GTEx_processing.R"
-R_SRC_PATH="${THIS_FOLDER}/modules/r/${R_FNAME}"
+R_SRC_PATH="${THIS_FOLDER}/scripts/r/${R_FNAME}"
 
 # Python
-PY_ENV="${THIS_FOLDER}/.venvs/drugbank-parser"
+PY_ENV="${THIS_FOLDER}/.venvs/py"
 
 # RAW
 XML_PATH="${RAW_FOLDER}/drugbank-${DRUGBANK_VERSION}.xml.gz"
@@ -44,7 +44,7 @@ GTEX_GENES_PATH="${INTERIM_FOLDER}/${GTEX_GENES_NAME}"
 DB_FILTERED_PATH="${FINAL_FOLDER}/drugbank-${DRUGBANK_VERSION}_gtex-${GTEX_VERSION}_mygene-${MYGENE_VERSION}.tsv"
 GENES_FILTERED_PATH="${FINAL_FOLDER}/genes-drugbank-${DRUGBANK_VERSION}_gtex-${GTEX_VERSION}_mygene-${MYGENE_VERSION}.tsv"
 
-PARSER_FOLDER="${THIS_FOLDER}/modules/drugbank-parser"
+PARSER_FOLDER="${THIS_FOLDER}/scripts/py"
 
 # Parsing
 conda run --no-capture-output --live-stream -p ${PY_ENV} python ${PARSER_FOLDER}/parser.py parse $XML_PATH $TSV_PATH

@@ -2,13 +2,13 @@
 
 set -e
 
-set -a; source .env; set +a
-
 THIS_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-PARSER_ENV_FOLDER="$THIS_FOLDER/.venvs/drugbank-parser"
-conda env remove -p ${PARSER_ENV_FOLDER} 
-conda env create -p ${PARSER_ENV_FOLDER} -f "$THIS_FOLDER/environment_drugbank-parser.yml"
+set -a; source .env; set +a
+
+PY_ENV_FOLDER="$THIS_FOLDER/.venvs/py"
+conda env remove -p ${PY_ENV_FOLDER} 
+conda env create -p ${PY_ENV_FOLDER} -f "$THIS_FOLDER/environment_py.yml"
 
 DREXML_ENV_FOLDER="$THIS_FOLDER/.venvs/drexml"
 if [[ -z "$USE_GPU" ]]; then
@@ -32,4 +32,3 @@ mkdir -p "$THIS_FOLDER/data/final"
 mkdir -p "$THIS_FOLDER/results/tables"
 mkdir -p "$THIS_FOLDER/results/ml"
 mkdir -p "$THIS_FOLDER/results/rds"
-touch -a .env
