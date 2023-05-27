@@ -15,11 +15,13 @@ if test -f "$THIS_FOLDER/.env"; then
     cp $THIS_FOLDER/example.env $THIS_FOLDER/.env
 fi
 
-set -a; source .env; set +a
+set -a; source $THIS_FOLDER/.env; set +a
 
-if source $(conda info --base)/etc/profile.d/conda.sh; then
+if ! command -v conda >/dev/null 2>&1; then
+    source $(conda info --base)/etc/profile.d/conda.sh
     echo "conda already available"
-elif . ~/miniconda3/etc/profile.d/conda.sh; then
+elif test -f ~/miniconda3/etc/profile.d/conda.sh; then
+    . ~/miniconda3/etc/profile.d/conda.sh;
     echo "conda already available, sourcing installed conda"
 else
     echo "Installing miniconda into the project's workspace"
