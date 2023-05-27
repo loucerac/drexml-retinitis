@@ -1,4 +1,14 @@
-#!/usr/bin/env RScript
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) == 0) {
+  gtex_fname <- "GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct.gz"
+} else if (length(args) == 1) {
+  gtex_fname <- args[1]
+  vers <- "V8"
+} else {
+  gtex_fname <- args[1]
+  vers <- args[2]
+}
 
 #########################################
 ### Processing GTEx V8 datasets #####
@@ -19,7 +29,7 @@ dir.create(here("data", "final"), showWarnings = FALSE, recursive=TRUE)
 
 ## Read the downloaded GTEx raw counts dataset
 expreset_raw <- fread(
-  file = here("data", "raw", "GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct.gz"),
+  file = here("data", "raw", gtex_fname),
   header = T, sep = "\t"
 ) %>% as.data.frame(.)
 
@@ -57,9 +67,15 @@ results <- hipathia(exp_data, pathways, decompose = FALSE, verbose = FALSE)
 path_vals <- get_paths_data(results, matrix = TRUE)
 
 
-saveRDS(exp_data, file = here("data", "final", "expreset_Hinorm_gtexV8.rds"))
+saveRDS(
+  exp_data, 
+file = here("data", "final", paste0("expreset_Hinorm_gtex", vers, ".rds"))
+)
 
-saveRDS(path_vals, file = here("data", "final", "expreset_pathvals_gtexV8.rds"))
+saveRDS(
+  path_vals, 
+  file = here("data", "final", paste0("expreset_pathvals_gtex", vers, ".rds"))
+  )
 
 save_feather <- function(x, path) {
   df <- data.frame(index = row.names(x), x)
@@ -70,11 +86,11 @@ save_feather <- function(x, path) {
 
 save_feather(
   t(exp_data),
-  file.path(here("data", "final", "expreset_Hinorm_gtexV8.rds.feather"))
+  here("data", "final", paste0("expreset_Hinorm_gtex", vers, ".rds.feather"))
 )
 
 
 save_feather(
   t(path_vals),
-  file.path(here("data", "final", "expreset_pathvals_gtexV8.rds.feather"))
+  here("data", "final", paste0("expreset_pathvals_gtex", vers, ".rds.feather"))
 )
