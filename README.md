@@ -51,7 +51,8 @@
 
 
 ## Setup and Usage
-The project requires a working `conda` and a `GNU/Linux x64` system.
+The project requires a working `conda` and a `GNU/Linux x64` system. If `conda` is not available,
+ the workflow will try to install the `miniconda` distribution.
 
 Install the dependencies with:
 
@@ -59,6 +60,8 @@ Install the dependencies with:
 
 If using a SLURM-based HPC, run the full analysis with:
 `sbatch run.sbatch`
+
+If using `bash` the same script could be used in a non-SLURM system.
 
 ## Authors and contributors
 
