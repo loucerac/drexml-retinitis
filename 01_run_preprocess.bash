@@ -91,6 +91,9 @@ if [ "$UPDATE" = true ] ; then
     echo "circuits_column=in_disease" >> $THIS_FOLDER/exp_design.env
     echo "genes=$GENES_FILTERED_NAME" >> $THIS_FOLDER/exp_design.env
     echo "genes_column=drugbank_approved_targets" >> $THIS_FOLDER/exp_design.env
+    echo "MYGENE_VERSION=${MYGENE_VERSION}" >> $THIS_FOLDER/exp_design.env
+    echo "DRUGBANK_VERSION=${DRUGBANK_VERSION}" >> $THIS_FOLDER/exp_design.env
+    echo "GTEX_VERSION=${GTEX_VERSION}" >> $THIS_FOLDER/exp_design.env
 else
     cp -f $THIS_FOLDER/exp_design_default.env $THIS_FOLDER/exp_design.env
 fi
