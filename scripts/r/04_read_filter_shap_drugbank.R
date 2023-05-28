@@ -1,3 +1,11 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) == 0) {
+  db_name <- "genes_drugbank-v050108_mygene-20230120.tsv"
+} else {
+  db_name <- args[1] 
+}
+
 ############################################
 ## Project: RP DRexML
 ## Script purpose:  Read and filter SHAP model results and drugbank db to plot and interpret.
@@ -156,7 +164,7 @@ dim(drugbank_app_action) ## 2690 combinations KDT-drug taken into account
 length(unique(drugbank_app_action$uniprot_id)) ## 718 Uniprot IDs filtered 
 
 ## Load genes stable translator used to Unipro IDs
-entrez_uniprot <- read.delim(file = file.path(data_folder2,"genes_drugbank-v050108_mygene-20230120.tsv")) %>% .[.$uniprot_id %in% drugbank_app_action$uniprot_id , ]
+entrez_uniprot <- read.delim(file = file.path(data_folder2, db_name)) %>% .[.$uniprot_id %in% drugbank_app_action$uniprot_id , ]
 dim(entrez_uniprot)
 
 drugbank_app_action <- merge(drugbank_app_action, entrez_uniprot,) %>% .[-which(is.na(.$entrez_id)),] 
