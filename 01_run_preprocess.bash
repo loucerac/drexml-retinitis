@@ -42,7 +42,8 @@ GTEX_GENES_PATH="${INTERIM_FOLDER}/${GTEX_GENES_NAME}"
 
 # FINAL
 DB_FILTERED_PATH="${FINAL_FOLDER}/drugbank-${DRUGBANK_VERSION}_gtex-${GTEX_VERSION}_mygene-${MYGENE_VERSION}.tsv"
-GENES_FILTERED_PATH="${FINAL_FOLDER}/genes-drugbank-${DRUGBANK_VERSION}_gtex-${GTEX_VERSION}_mygene-${MYGENE_VERSION}.tsv"
+GENES_FILTERED_NAME="genes-drugbank-${DRUGBANK_VERSION}_gtex-${GTEX_VERSION}_mygene-${MYGENE_VERSION}.tsv"
+GENES_FILTERED_PATH="${FINAL_FOLDER}/${GENES_FILTERED_NAME}"
 
 PARSER_FOLDER="${THIS_FOLDER}/scripts/py"
 
@@ -55,7 +56,7 @@ else
     echo "$DB_GENES_PATH does no exist."
     if [ "$UPDATE" = true ] ; then
         echo "Updating"
-        conda run --no-capture-output --live-stream -p ${R_ENV} Rscript ${R_SRC_PATH}
+        conda run --no-capture-output --live-stream -p ${R_ENV} Rscript ${R_SRC_PATH} ${GTEX_FNAME} ${GTEX_VERSION}
         conda run --no-capture-output --live-stream -p ${PY_ENV} python ${PARSER_FOLDER}/parser.py translate $TSV_PATH $DB_GENES_PATH --kind drugbank 
         conda run --no-capture-output --live-stream -p ${PY_ENV} python ${PARSER_FOLDER}/parser.py translate $PARQUET_PATH $GTEX_GENES_PATH --kind gtex 
     else
@@ -77,3 +78,19 @@ conda run --no-capture-output --live-stream -p ${PY_ENV} python ${PARSER_FOLDER}
     --gtex-genes-path ${GTEX_GENES_PATH} \
     ${DB_FILTERED_PATH} \
     ${GENES_FILTERED_PATH}
+
+
+# recreate design environment after update
+if [ "$UPDATE" = true ] ; then
+    rm -f $THIS_FOLDER/exp_design.env
+    echo "###### EXPERIMENT DESIGN  ######" >> $THIS_FOLDER/exp_design.env
+    echo "data_path=${THIS_FOLDER}/data/final/" >> $THIS_FOLDER/exp_design.env
+    echo "gene_exp=expreset_Hinorm_gtex${GTEX_VERSION}.rds.feather" >> $THIS_FOLDER/exp_design.env
+    echo "pathvals=expreset_pathvals_gtex${GTEX_VERSION}.rds.feather" >> $THIS_FOLDER/exp_design.env 
+    echo "circuits=circuits_RP.rds.feather" >> $THIS_FOLDER/exp_design.env
+    echo "circuits_column=in_disease" >> $THIS_FOLDER/exp_design.env
+    echo "genes=$GENES_FILTERED_NAME" >> $THIS_FOLDER/exp_design.env
+    echo "genes_column=drugbank_approved_targets" >> $THIS_FOLDER/exp_design.env
+else
+    cp -f $THIS_FOLDER/exp_design_default.env $THIS_FOLDER/exp_design.env
+fi

@@ -195,4 +195,5 @@ drexml-retinitis.Rproj
 
 # CONDA
 condaenv*
+exp_design.env
 debug.py
