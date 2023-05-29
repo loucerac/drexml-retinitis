@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# R projects
+*.Rpoj
+
 # Distribution / packaging
 .Python
 build/
@@ -185,3 +188,12 @@ rsconnect/
 data/
 nohup*
 results/
+logs/
+rds/
+Rplots.pdf
+drexml-retinitis.Rproj
+
+# CONDA
+condaenv*
+exp_design.env
+debug.py
