@@ -74,6 +74,7 @@ We have included a minimal update mechanism to facilitate the reanalysis of the 
   - To update the GTEx counts, copy the `gct` file to `data/raw` and update `GTEX_FNAME` in `.env`.
   - Follow the same procedure with the `hpo.obo` files.
   - RP experts could update the manually curated files.
+  - DRExM³L will be automatically updated to the last stable release.
 - Set `USE_GPU=N` to use the indicated number of GPUs, `N=1, 2, ...` (0 for CPU).
 
 ## Authors and contributors

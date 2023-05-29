@@ -18,9 +18,17 @@ else
 fi
 
 if [[ "$n_gpus" -gt 0 ]]; then
-    env_file="environment_drexml_gpu.yml"
+    if [ "$UPDATE" = false ] ; then
+        env_file="environment_drexml_gpu.yml"
+    else
+        env_file="environment_update_drexml_gpu.yml"
+    fi
 else
-    env_file="environment_drexml.yml"
+    if [ "$UPDATE" = false ] ; then
+        env_file="environment_drexml.yml"
+    else
+        env_file="environment_update_drexml.yml"
+    fi
 fi
 
 echo "using ${env_file}"
