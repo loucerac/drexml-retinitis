@@ -88,4 +88,4 @@ dependencies:
   - wheel=0.40.0
   - xz=5.2.6
   - pip:
-    - git+https://github.com/loucerac/drexml.git@v0.9.9-retinitis
+    - git+https://github.com/loucerac/drexml.git@v0.9.9.1-retinitis
