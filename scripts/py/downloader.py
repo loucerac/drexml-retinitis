@@ -29,7 +29,8 @@ rp_files = [
     "physiological_paths.tsv",
     "physPathsAnnot.tsv",
     "WHO ATC-DDD 2021-12-03.csv",
-    "RP_map_functions_MPC-annot.xlsx"
+    "RP_map_functions_MPC-annot.xlsx",
+    "drug_actions_withSimplAction.csv"
 ]
 
 drexml_files = [
