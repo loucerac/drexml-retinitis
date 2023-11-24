@@ -171,8 +171,7 @@ drugbank_app_action <- merge(drugbank_app_action, entrez_uniprot,) %>% .[-which(
 length(unique(drugbank_app_action$entrez_id)) 
 all(targets_shap_rel_stable$entrez %in% drugbank_app_action$entrez_id) ## check 
 
-
-saveRDS(drugbank_app_action, here("rds", "drugbank_app_action_entrez.rds"))
+saveRDS(drugbank_app_action, file.path(rds_folder, "drugbank_app_action_entrez.rds"))
 
 drugbank_app_action$entrez_id <- as.character(drugbank_app_action$entrez_id)
 drugbank_app_action_genes <- merge(drugbank_app_action, genes_tr, by.x = "entrez_id", by.y = "entrez" ) ## Add the symbol column from the stable translate table
@@ -185,7 +184,7 @@ drug_effects_translation <- fread(here("data","interim", "drug_actions_withSimpl
 drugbank_app_action_genes$simplified_action <- drug_effects_translation$Drug_eff_simpl[match(drugbank_app_action_genes$actions, drug_effects_translation$Var1)]
 
 length(unique(drugbank_app_action_genes$entrez_id)) ## We have all included KDTs 711
-write.xlsx(drugbank_app_action_genes, file = here("results", "tables", "supp_tabl3_drugbank518_filtered.xlsx"))
+write.xlsx(drugbank_app_action_genes, file = file.path(tables_folder, "supp_tabl3_drugbank518_filtered.xlsx"))
 
 alldrug_byaction <- drugbank_app_action_genes[,c("name", "actions", "entrez_id")]
 colnames(alldrug_byaction) <- c("drug", "drug_action", "KDT")  
