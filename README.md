@@ -61,6 +61,11 @@ The necessary data to reproduce the results of the manuscript can be downloaded 
   - File path: data/raw
   - Source: http://hipathia.babelomics.org/
 
+- Main actions by drug (manually curated):
+  - File name: drug_actions_withSimplAction.csv
+  - File path: data/raw
+  - Source: https://go.drugbank.com/releases
+
 ## RP Mechanistic Map
 ![RP Mechanistic Map](./img/fig2_Pathway_Viewer_header.png)
 
