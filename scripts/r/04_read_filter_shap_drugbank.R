@@ -180,7 +180,7 @@ drugbank_app_action_genes$actions[grep(drugbank_app_action$actions, pattern = "u
 any(is.na(drugbank_app_action_genes$actions))
 data.frame(table(drugbank_app_action_genes$actions))%>% write.table(., file = here("data","interim", "drug_actions.tsv"), sep = "\t", quote = F, col.names = T, row.names = F) ## Create drug effect table
 
-drug_effects_translation <- fread(here("data","interim", "drug_actions_withSimplAction.csv")) ## Read edited table with simplified drug effect
+drug_effects_translation <- fread(here("data","raw", "drug_actions_withSimplAction.csv")) ## Read edited table with simplified drug effect
 drugbank_app_action_genes$simplified_action <- drug_effects_translation$Drug_eff_simpl[match(drugbank_app_action_genes$actions, drug_effects_translation$Var1)]
 
 length(unique(drugbank_app_action_genes$entrez_id)) ## We have all included KDTs 711
