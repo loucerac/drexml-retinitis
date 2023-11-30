@@ -1,0 +1,19 @@
+version=1.0.1
+    DATA:
+
+        Problem: Zenodo changed the way to use the API and required a developer token to use it.
+
+        Solution: We have already solved this problem in the DREXML package and I have propagated the changes. We do not use the API, we use the download link resolution directly.
+
+    DATA and CODE:
+
+        Problem: In the review, a file was changed in the development branch and the changes were uploaded partially, making a change that required a new annotation file undetectable. The part that fails only affects the visualization of a heatmap.
+
+        Solution: The complete code has been incorporated and the missing file has been uploaded to ZENODO.
+
+    CODE:
+
+        Problem: There was one dependency resolution that pulled from a library with an unresolvable version today.
+
+        Solution: I created a patch on the version that was used in retinitis in the Python package and in the retinitis package it points to the patch.
+
