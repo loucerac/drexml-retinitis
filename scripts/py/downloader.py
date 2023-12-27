@@ -4,6 +4,11 @@ from dotenv import find_dotenv
 from pathlib import Path
 import tarfile
 
+import pystow
+import requests
+from urllib.parse import quote
+
+
 DATA_REPOSITORY = Path(find_dotenv()).parent.joinpath("data")
 RAW_FOLDER = DATA_REPOSITORY.joinpath("raw")
 RAW_FOLDER.mkdir(exist_ok=True, parents=True)
@@ -24,7 +29,8 @@ rp_files = [
     "physiological_paths.tsv",
     "physPathsAnnot.tsv",
     "WHO ATC-DDD 2021-12-03.csv",
-    "RP_map_functions_MPC-annot.xlsx"
+    "RP_map_functions_MPC-annot.xlsx",
+    "drug_actions_withSimplAction.csv"
 ]
 
 drexml_files = [
@@ -32,14 +38,60 @@ drexml_files = [
     "expreset_pathvals_gtexV8.rds.feather"    
 ]
 
+
+def get_latest_record(record_id):
+    """Get latest zenodo record ID from a given deposition identifier
+
+    Parameters
+    ----------
+    record_id : str
+        deposition identifier
+
+    Returns
+    -------
+    str
+        latest record ID
+    
+    """
+
+    url = requests.get(f"https://zenodo.org/records/{record_id}", timeout=10).url
+    return url.split("/")[-1]
+
+
+def ensure_zenodo(name, record_id="6020480"):
+    """Ensure file availability and download it from zenodo
+
+    Parameters
+    ----------
+    name : str
+        file name
+    record_id : str
+        deposition identifier
+
+    Returns
+    -------
+    path : path-like
+        PosixPath to downloaded file
+
+    """
+
+    record_id = get_latest_record(record_id)
+    print(name, quote(name))
+    url = f"https://zenodo.org/records/{record_id}/files/{quote(name)}?download=1"
+    #url = f"{quote(url)}?download=1"
+    print(url)
+
+    path = pystow.ensure("drexml", "datasets", record_id, url=url)
+
+    return path
+
 def download_files(record, files, folder):
     record = str(record)
 
-    zenodo = Zenodo()
+    paths = [ensure_zenodo(this_file, record) for this_file in files]
 
-    paths = [zenodo.download_latest(record, this_file) for this_file in files]
-
-    for path in paths: 
+    for path in paths:
+        print(path)
         if "localPDB" in path.name:
             this_file = tarfile.open(path.as_posix())
             this_file.extractall(folder)
@@ -48,5 +100,5 @@ def download_files(record, files, folder):
 
 
 if __name__ == "__main__":
-    download_files(7957439, rp_files, RAW_FOLDER)
+    download_files(7957438, rp_files, RAW_FOLDER)
     download_files(7737166, drexml_files, FINAL_FOLDER)

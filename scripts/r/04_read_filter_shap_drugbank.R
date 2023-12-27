@@ -173,53 +173,27 @@ all(targets_shap_rel_stable$entrez %in% drugbank_app_action$entrez_id) ## check
 
 saveRDS(drugbank_app_action, file.path(rds_folder, "drugbank_app_action_entrez.rds"))
 
+drugbank_app_action$entrez_id <- as.character(drugbank_app_action$entrez_id)
 drugbank_app_action_genes <- merge(drugbank_app_action, genes_tr, by.x = "entrez_id", by.y = "entrez" ) ## Add the symbol column from the stable translate table
-drugbank_app_action_genes$actions[drugbank_app_action_genes$actions == ""] <- "unknown" ## unify the not known drug actions to the same term "unknown"
-drugbank_app_action_genes$actions[drugbank_app_action_genes$actions == "other"]  <- "unknown" ## unify the not known drug actions to the same term "unknown"
+drugbank_app_action_genes$actions[drugbank_app_action_genes$actions == ""] <- "Other" ## unify the not known drug actions to the same term "unknown"
+drugbank_app_action_genes$actions[grep(drugbank_app_action$actions, pattern = "unknown|other/unknown")] <- "Other" ## unify the not known drug actions to the same term "unknown"
 any(is.na(drugbank_app_action_genes$actions))
-data.frame(table(drugbank_app_action_genes$actions))
+data.frame(table(drugbank_app_action_genes$actions))%>% write.table(., file = here("data","interim", "drug_actions.tsv"), sep = "\t", quote = F, col.names = T, row.names = F) ## Create drug effect table
 
-drugbank_app_action_genes$simplified_action <- ifelse(drugbank_app_action_genes$actions == "ligand", "Ligand",
-                                                      ifelse(drugbank_app_action_genes$actions == "adduct|binder", "Ligand",
-                                                             ifelse(drugbank_app_action_genes$actions == "binder", "Ligand",
-                                                                    ifelse(drugbank_app_action_genes$actions == "binding", "Ligand", 
-                                                                          ifelse(drugbank_app_action_genes$actions == "inverse agonist", "Modulator",
-                                                                            ifelse(drugbank_app_action_genes$actions == "allosteric modulator", "Modulator",
-                                                                                 ifelse(drugbank_app_action_genes$actions == "antibody","Modulator",
-                                                                                        ifelse(drugbank_app_action_genes$actions == "antagonist|partial agonist" , "Modulator", 
-                                                                                               ifelse(drugbank_app_action_genes$actions == "antagonist|agonist|negative modulator", "Modulator",
-                                                                                                      ifelse(drugbank_app_action_genes$actions == "antagonist|agonist", "Modulator",
-                                                                                                            ifelse(grepl("potentiator|agonist|activator|agonist\\|inducer|inducer|activator\\|modulator|substrate|stimulator|positive allosteric modulator|antisense oligonucleotide", drugbank_app_action_genes$actions), "Activator",
-                                                                                                                 ifelse(grepl("other|chaperone|cleveage|substrate|oxidizer|deoxidizer|cofactor|neutralizer|gene replacement|incorporation into and destabilization|unknown|stabilization|product of|chaperone",drugbank_app_action_genes$actions), "other","Inhibitor"))))))))))))
-            
+drug_effects_translation <- fread(here("data","raw", "drug_actions_withSimplAction.csv")) ## Read edited table with simplified drug effect
+drugbank_app_action_genes$simplified_action <- drug_effects_translation$Drug_eff_simpl[match(drugbank_app_action_genes$actions, drug_effects_translation$Var1)]
 
 length(unique(drugbank_app_action_genes$entrez_id)) ## We have all included KDTs 711
-
-write.xlsx(drugbank_app_action_genes, file =  file.path(tables_folder, "supp_tabl3_drugbank518_filtered.xlsx"))
+write.xlsx(drugbank_app_action_genes, file = file.path(tables_folder, "supp_tabl3_drugbank518_filtered.xlsx"))
 
 alldrug_byaction <- drugbank_app_action_genes[,c("name", "actions", "entrez_id")]
 colnames(alldrug_byaction) <- c("drug", "drug_action", "KDT")  
 
-
-## Simplify the drug action vector to 4 categories: "Activator", "Ligand", "Binder", "Inhibitor"
-alldrug_byaction$Drug_effect <-ifelse(alldrug_byaction$drug_action == "ligand", "Ligand",
-                                      ifelse(alldrug_byaction$drug_action == "adduct|binder", "Ligand",
-                                             ifelse(alldrug_byaction$drug_action == "binder", "Ligand",
-                                                    ifelse(alldrug_byaction$drug_action == "binding", "Ligand", 
-                                                           ifelse(alldrug_byaction$drug_action == "inverse agonist", "Modulator",
-                                                                  ifelse(alldrug_byaction$drug_action == "allosteric modulator", "Modulator",
-                                                                         ifelse(alldrug_byaction$drug_action == "antibody","Modulator",
-                                                                                ifelse(alldrug_byaction$drug_action == "antagonist|partial agonist" , "Modulator", 
-                                                                                       ifelse(alldrug_byaction$drug_action == "antagonist|agonist|negative modulator", "Modulator",
-                                                                                              ifelse(alldrug_byaction$drug_action == "antagonist|agonist", "Modulator",
-                                                                                                     ifelse(grepl("potentiator|agonist|activator|agonist\\|inducer|inducer|activator\\|modulator|substrate|stimulator|positive allosteric modulator|antisense oligonucleotide", alldrug_byaction$drug_action), "Activator",
-                                                                                                            ifelse(grepl("other|chaperone|cleveage|substrate|oxidizer|deoxidizer|cofactor|neutralizer|gene replacement|incorporation into and destabilization|unknown|stabilization|product of|chaperone",alldrug_byaction$drug_action), "other","Inhibitor"))))))))))))
-
+## Add simplified drug effects
+alldrug_byaction$Drug_effect <- drug_effects_translation$Drug_eff_simpl[match(alldrug_byaction$drug_action, drug_effects_translation$Var1)]
 alldrug_byaction$Drug_effect <- factor(alldrug_byaction$Drug_effect, levels = unique(alldrug_byaction$Drug_effect))
 length(unique(alldrug_byaction$drug)) ## 1410 unique drugs
 alldrug_byaction$drugKDT <- paste0(alldrug_byaction$drug, alldrug_byaction$KDT)
-
-table(alldrug_byaction$Drug_effect)
 
 
 df_venn <- alldrug_byaction[, c("drug","Drug_effect")]  %>% add_column(value = as.numeric(1)) %>% dplyr::group_by(drug, Drug_effect) %>%
@@ -234,7 +208,7 @@ png(filename = file.path(figures_folder,"venn_drugeffectsALL.png"), width = 8000
 venn(df_venn, ilab=TRUE, zcolor = "style")
 dev.off()
 
-#### 2.  Filter and organize the drugs and their gene targets #
+#### 4.  Filter and organize the drugs and their gene targets #
 drugbank_effects_tar <- drugbank_app_action[which(drugbank_app_action$entrez_id %in% targets_shap_rel_stable$entrez), 
                                             which(colnames(drugbank_app_action) %in% c("uniprot_id","drugbank_id","name", "type" , "groups", "categories", "description", "actions", "entrez_id" )) ] 
 drugbank_effects_tar <- merge(drugbank_effects_tar, genes_tr, by.x = "entrez_id", by.y = "entrez" ) ## Add the symbol column from the stable translate table
@@ -250,18 +224,7 @@ saveRDS(drugbank_effects_tar, file.path(rds_folder, "drugbank_effects_tar.rds"))
 ## Create a data frame to do Venn diagram of the simplified drug effects - RELEVANT DRUGS FILTERED BY DREXM3L
 drugs_rel_DF <- drugbank_effects_tar[, c("name", "actions", "symbol")]
 
-drugs_rel_DF$Drug_effect <-ifelse(drugs_rel_DF$actions == "ligand", "Ligand",
-                                  ifelse(drugs_rel_DF$actions == "adduct|binder", "Ligand",
-                                         ifelse(drugs_rel_DF$actions == "binder", "Ligand",
-                                                ifelse(drugs_rel_DF$actions == "binding", "Ligand", 
-                                                       ifelse(drugs_rel_DF$actions == "inverse agonist", "Modulator",
-                                                              ifelse(drugs_rel_DF$actions == "allosteric modulator", "Modulator",
-                                                                     ifelse(drugs_rel_DF$actions == "antibody","Modulator",
-                                                                            ifelse(drugs_rel_DF$actions == "antagonist|partial agonist" , "Modulator", 
-                                                                                   ifelse(drugs_rel_DF$actions== "antagonist|agonist|negative modulator", "Modulator",
-                                                                                          ifelse(drugs_rel_DF$actions == "antagonist|agonist", "Modulator",
-                                                                                                 ifelse(grepl("potentiator|agonist|activator|agonist\\|inducer|inducer|activator\\|modulator|substrate|stimulator|positive allosteric modulator|antisense oligonucleotide", drugs_rel_DF$actions), "Activator",
-                                                                                                        ifelse(grepl("other|chaperone|cleveage|substrate|oxidizer|deoxidizer|cofactor|neutralizer|gene replacement|incorporation into and destabilization|unknown|stabilization|product of|chaperone",drugs_rel_DF$actions), "other","Inhibitor"))))))))))))
+drugs_rel_DF$Drug_effect <-drug_effects_translation$Drug_eff_simpl[match(drugs_rel_DF$actions, drug_effects_translation$Var1)] ## Add the simplified drug effects
 
 df_venn_relevant <- drugs_rel_DF[, c("name","Drug_effect")]  %>% add_column(value = as.numeric(1)) %>% dplyr::group_by(name, Drug_effect) %>%
   dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
@@ -286,20 +249,8 @@ drug_ef <- data.frame( symbol = targets_shap_rel_stable$Gene_symbol,
 any(is.na(drug_ef))
 table(drug_ef$Drug_effect)
 
-## Simplify the drug action vector to 4 categories: "Activator", "Ligand", "Binder", "Inhibitor"
-drug_ef$Drug_effect <- ifelse(drug_ef$Drug_effect == "ligand", "Ligand",
-                              ifelse(drug_ef$Drug_effect  == "adduct|binder", "Ligand",
-                                     ifelse(drug_ef$Drug_effect  == "binder", "Ligand",
-                                            ifelse(drug_ef$Drug_effect  == "binding", "Ligand", 
-                                                   ifelse(drug_ef$Drug_effect  == "inverse agonist", "Modulator",
-                                                          ifelse(drug_ef$Drug_effect  == "allosteric modulator", "Modulator",
-                                                                 ifelse(drug_ef$Drug_effect  == "antibody","Modulator",
-                                                                        ifelse(drug_ef$Drug_effect  == "antagonist|partial agonist" , "Modulator", 
-                                                                               ifelse(drug_ef$Drug_effect == "antagonist|agonist|negative modulator", "Modulator",
-                                                                                      ifelse(drug_ef$Drug_effect  == "antagonist|agonist", "Modulator",
-                                                                                             ifelse(grepl("potentiator|agonist|activator|agonist\\|inducer|inducer|activator\\|modulator|substrate|stimulator|positive allosteric modulator|antisense oligonucleotide",drug_ef$Drug_effect ), "Activator",
-                                                                                                    ifelse(grepl("other|chaperone|cleveage|substrate|oxidizer|deoxidizer|cofactor|neutralizer|gene replacement|incorporation into and destabilization|unknown|stabilization|product of|chaperone",drug_ef$Drug_effect ), "other","Inhibitor"))))))))))))
-  
+## Simplify the drug action vector to the selected categories: "Activator", "Ligand", "Other", "Inhibitor"
+drug_ef$Drug_effect <-drug_effects_translation$Drug_eff_simpl[match(drug_ef$Drug_effect, drug_effects_translation$Var1)] ## Add the simplified drug effects
 
 dim(drug_ef)
 table(drug_ef$Drug_effect)
@@ -307,5 +258,3 @@ table(drug_ef$Drug_effect)
 ## See which function is the most predominant for a certain gene KDT
 colnames(shap_relevant_stable)[!colnames(shap_relevant_stable) %in% drug_ef$symbol] ## Check that all KDTs have a drug effect
 write.table(drug_ef, file.path(tables_folder, "drugEffects_KDT_relevant_stable_simpl.tsv"), quote = F, sep = "\t", col.names = T, row.names = F)
-
-

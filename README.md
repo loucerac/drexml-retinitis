@@ -11,7 +11,7 @@
 
 ## Input Data
 
-The necessary data to reproduce the results of the manuscript can be downloaded from [Zenodo](https://zenodo.org/record/7969017). Note that the workflow will try to automatically download the data after installing the dependencies.
+The necessary data to reproduce the results of the manuscript can be downloaded from [Zenodo](https://zenodo.org/records/10203479). Note that the workflow will try to automatically download the data after installing the dependencies.
 
 - The Genotype-Tissue Expression (GTEx) RNA-Seq Data Gene read counts:
   - File name: GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct
@@ -60,6 +60,11 @@ The necessary data to reproduce the results of the manuscript can be downloaded 
   - File name: physPathsAnnot.tsv
   - File path: data/raw
   - Source: http://hipathia.babelomics.org/
+
+- Main actions by drug (manually curated):
+  - File name: drug_actions_withSimplAction.csv
+  - File path: data/raw
+  - Source: https://go.drugbank.com/releases
 
 ## RP Mechanistic Map
 ![RP Mechanistic Map](./img/fig2_Pathway_Viewer_header.png)

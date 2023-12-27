@@ -26,4 +26,4 @@ dependencies:
   - xz=5.2.10
   - zlib=1.2.13
   - pip:
-    - git+https://github.com/loucerac/drexml.git@v0.9.9-retinitis
+    - git+https://github.com/loucerac/drexml.git@v0.9.9.1-retinitis
